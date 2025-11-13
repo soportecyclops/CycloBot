@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CyclopsBot - El Adivinador Técnico</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo-container">
+                <div class="cyclops-eye">
+                    <div class="pupil"></div>
+                </div>
+                <h1>CyclopsBot</h1>
+            </div>
+            <p class="tagline">El adivinador técnico que diagnostica tus problemas informáticos</p>
+        </header>
+
+        <main>
+            <div class="chat-container">
+                <div class="chat-header">
+                    <h2>Diagnóstico en Progreso</h2>
+                    <div class="status-indicator">
+                        <span class="pulse"></span>
+                        <span>CyclopsBot está analizando...</span>
+                    </div>
+                </div>
+                
+                <div class="chat-messages" id="chatMessages">
+                    <div class="message bot-message">
+                        <div class="message-avatar">
+                            <div class="mini-eye"></div>
+                        </div>
+                        <div class="message-content">
+                            <p>¡Hola! Soy CyclopsBot, tu asistente técnico personal.</p>
+                            <p>Voy a hacerte algunas preguntas para diagnosticar tu problema. Piensa en el problema que tienes y yo intentaré adivinarlo.</p>
+                            <p>¿Estás listo para comenzar?</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="chat-input">
+                    <div class="input-container">
+                        <input type="text" id="userInput" placeholder="Describe tu problema o responde a la pregunta...">
+                        <button id="sendButton">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M22 2L11 13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="quick-actions">
+                        <button class="quick-btn" data-action="start">Comenzar Diagnóstico</button>
+                        <button class="quick-btn" data-action="reset">Reiniciar</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="info-panel">
+                <h3>Problemas que puedo diagnosticar:</h3>
+                <ul>
+                    <li>📶 Problemas de Internet y WiFi</li>
+                    <li>💻 Fallas de Hardware</li>
+                    <li>🔧 Errores de Software</li>
+                    <li>📱 Problemas con Teléfonos Móviles</li>
+                    <li>🖥️ Configuraciones de Sistema</li>
+                </ul>
+                
+                <div class="stats">
+                    <div class="stat-item">
+                        <span class="stat-number" id="problemsCount">0</span>
+                        <span class="stat-label">Problemas en mi base</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number" id="diagnosticsCount">0</span>
+                        <span class="stat-label">Diagnósticos realizados</span>
+                    </div>
+                </div>
+            </div>
+        </main>
+        
+        <footer>
+            <p>CyclopsBot v1.0 - Proyecto de Soporte Técnico Inteligente</p>
+            <p>Basado en tecnología tipo Akinator para diagnóstico técnico</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
