@@ -1032,7 +1032,7 @@
 
     <!-- Scripts -->
     <script>
-        // Clase CyclopsBot mejorada
+        // Clase CyclopsBot mejorada con categorías coherentes
         class CyclopsBotAvanzado {
             constructor() {
                 this.currentCategory = null;
@@ -1047,6 +1047,88 @@
                 // Sistema de refinamiento
                 this.refinementLevel = 0;
                 this.maxButtonsPerLevel = 6;
+                
+                // Base de datos de problemas organizada por categorías coherentes
+                this.problemasPorCategoria = {
+                    'hardware': {
+                        'encendido': [
+                            { id: 1, descripcion: 'Computadora no enciende o no arranca', icono: '🔌' },
+                            { id: 2, descripcion: 'La computadora se apaga sola', icono: '⚡' },
+                            { id: 3, descripcion: 'Problemas con la fuente de alimentación', icono: '🔋' }
+                        ],
+                        'rendimiento': [
+                            { id: 4, descripcion: 'Memoria RAM insuficiente para aplicaciones', icono: '🧠' },
+                            { id: 5, descripcion: 'La computadora funciona muy lenta', icono: '🐌' },
+                            { id: 6, descripcion: 'Sobrecalentamiento del equipo', icono: '🔥' }
+                        ],
+                        'pantalla': [
+                            { id: 7, descripcion: 'Pantalla en negro o sin señal', icono: '🖥️' },
+                            { id: 8, descripcion: 'Píxeles muertos en la pantalla', icono: '🔳' },
+                            { id: 9, descripcion: 'Problemas con la tarjeta gráfica', icono: '🎮' }
+                        ],
+                        'perifericos': [
+                            { id: 10, descripcion: 'Mouse o ratón no responde', icono: '🖱️' },
+                            { id: 11, descripcion: 'Teclado no funciona correctamente', icono: '⌨️' },
+                            { id: 12, descripcion: 'Problemas con la impresora', icono: '🖨️' }
+                        ]
+                    },
+                    'software': {
+                        'windows': [
+                            { id: 13, descripcion: 'Windows no inicia correctamente', icono: '🪟' },
+                            { id: 14, descripcion: 'Pantalla azul de la muerte (BSOD)', icono: '💙' },
+                            { id: 15, descripcion: 'Error de sistema operativo', icono: '❌' }
+                        ],
+                        'programas': [
+                            { id: 16, descripcion: 'Programas que no se instalan', icono: '📥' },
+                            { id: 17, descripcion: 'Aplicaciones que se cierran solas', icono: '🚪' },
+                            { id: 18, descripcion: 'Software que no responde', icono: '⏳' }
+                        ],
+                        'virus': [
+                            { id: 19, descripcion: 'Infección por virus o malware', icono: '🦠' },
+                            { id: 20, descripcion: 'Rendimiento lento por software malicioso', icono: '🐢' },
+                            { id: 21, descripcion: 'Pop-ups y anuncios no deseados', icono: '📢' }
+                        ],
+                        'actualizaciones': [
+                            { id: 22, descripcion: 'Problemas con actualizaciones de Windows', icono: '🔄' },
+                            { id: 23, descripcion: 'Error al actualizar controladores', icono: '⚙️' },
+                            { id: 24, descripcion: 'Actualizaciones que no se instalan', icono: '📲' }
+                        ]
+                    },
+                    'internet': {
+                        'wifi': [
+                            { id: 25, descripcion: 'Conexión WiFi intermitente', icono: '📶' },
+                            { id: 26, descripcion: 'No puedo conectarme al WiFi', icono: '🚫' },
+                            { id: 27, descripcion: 'Señal WiFi débil', icono: '📡' }
+                        ],
+                        'velocidad': [
+                            { id: 28, descripcion: 'Internet muy lento', icono: '🐌' },
+                            { id: 29, descripcion: 'Velocidad de descarga baja', icono: '⬇️' },
+                            { id: 30, descripcion: 'Problemas con la velocidad de subida', icono: '⬆️' }
+                        ],
+                        'conexion': [
+                            { id: 31, descripcion: 'No hay conexión a Internet', icono: '🌐' },
+                            { id: 32, descripcion: 'Conexión por cable no funciona', icono: '🔌' },
+                            { id: 33, descripcion: 'Problemas con el router/módem', icono: '📡' }
+                        ]
+                    },
+                    'movil': {
+                        'bateria': [
+                            { id: 34, descripcion: 'Batería se agota muy rápido', icono: '🔋' },
+                            { id: 35, descripcion: 'El dispositivo no carga', icono: '⚡' },
+                            { id: 36, descripcion: 'Sobrecalentamiento de la batería', icono: '🔥' }
+                        ],
+                        'senal': [
+                            { id: 37, descripcion: 'Problemas de señal móvil', icono: '📶' },
+                            { id: 38, descripcion: 'No hay conexión de datos', icono: '📱' },
+                            { id: 39, descripcion: 'Llamadas que se cortan', icono: '📞' }
+                        ],
+                        'aplicaciones': [
+                            { id: 40, descripcion: 'Aplicaciones que no funcionan', icono: '📱' },
+                            { id: 41, descripcion: 'El teléfono se reinicia solo', icono: '🔄' },
+                            { id: 42, descripcion: 'Problemas de almacenamiento', icono: '💾' }
+                        ]
+                    }
+                };
                 
                 this.initializeBot();
             }
@@ -1076,10 +1158,10 @@
                 this.refinementLevel = 0;
                 
                 const categoriasPrincipales = [
-                    { id: 'internet', nombre: 'Internet & Redes', icono: '🌐', subcategorias: ['wifi', 'velocidad', 'conexion', 'juegos', 'streaming'] },
-                    { id: 'hardware', nombre: 'Hardware & PC', icono: '💻', subcategorias: ['encendido', 'rendimiento', 'pantalla', 'sonido', 'perifericos'] },
-                    { id: 'software', nombre: 'Software & Sistema', icono: '🖥️', subcategorias: ['windows', 'programas', 'virus', 'actualizaciones', 'rendimiento'] },
-                    { id: 'movil', nombre: 'Dispositivos Móviles', icono: '📱', subcategorias: ['bateria', 'senal', 'pantalla', 'aplicaciones', 'rendimiento'] }
+                    { id: 'hardware', nombre: 'Hardware & PC', icono: '💻', descripcion: 'Problemas físicos y componentes' },
+                    { id: 'software', nombre: 'Software & Sistema', icono: '🖥️', descripcion: 'Sistema operativo y programas' },
+                    { id: 'internet', nombre: 'Internet & Redes', icono: '🌐', descripcion: 'Conexión y redes' },
+                    { id: 'movil', nombre: 'Dispositivos Móviles', icono: '📱', descripcion: 'Teléfonos y tablets' }
                 ];
 
                 this.mostrarBotonesRefinamiento(
@@ -1095,8 +1177,8 @@
                 
                 this.addMessage('user', `📂 ${categoria.icono} ${categoria.nombre}`);
                 
-                // Mostrar subcategorías
-                const subcategorias = categoria.subcategorias.map(sub => ({
+                // Obtener subcategorías para esta categoría
+                const subcategorias = Object.keys(this.problemasPorCategoria[categoria.id] || {}).map(sub => ({
                     id: sub,
                     nombre: this.getSubcategoryDisplayName(sub, categoria.id),
                     icono: this.getSubcategoryIcon(sub)
@@ -1115,22 +1197,22 @@
                 
                 this.addMessage('user', `🎯 ${subcategoria.icono} ${subcategoria.nombre}`);
 
-                // Simular problemas para la demostración
-                const problemasSimulados = [
-                    { id: 1, descripcion: 'Computadora no enciende o no arranca', icono: '🔌' },
-                    { id: 2, descripcion: 'Mouse o ratón no responde', icono: '🖱️' },
-                    { id: 3, descripcion: 'Espacio en disco duro insuficiente', icono: '💾' },
-                    { id: 4, descripcion: 'Memoria RAM insuficiente para aplicaciones', icono: '🧠' }
-                ];
+                // Obtener problemas específicos para esta subcategoría
+                const problemas = this.problemasPorCategoria[categoriaPadre.id]?.[subcategoria.id] || [];
+                
+                if (problemas.length === 0) {
+                    this.addMessage('bot', '❌ No se encontraron problemas para esta subcategoría.');
+                    return;
+                }
 
                 this.mostrarBotonesRefinamiento(
-                    problemasSimulados.map(p => ({
+                    problemas.map(p => ({
                         id: p.id,
                         nombre: p.descripcion,
                         icono: p.icono
                     })),
                     '❓ **Selecciona el problema exacto:**',
-                    (problema) => this.seleccionarProblemaRefinado(problema, problemasSimulados)
+                    (problema) => this.seleccionarProblemaRefinado(problema, problemas)
                 );
             }
 
@@ -1202,32 +1284,37 @@
             // MÉTODOS AUXILIARES PARA REFINAMIENTO
             getSubcategoryDisplayName(subcategoria, categoria) {
                 const nombres = {
-                    'wifi': 'Problemas de WiFi',
-                    'velocidad': 'Velocidad de Internet',
-                    'conexion': 'Conexión y Redes',
-                    'juegos': 'Juegos Online',
-                    'streaming': 'Streaming y Video',
-                    'encendido': 'Encendido y Arranque',
-                    'rendimiento': 'Rendimiento y Lentitud',
-                    'pantalla': 'Pantalla y Gráficos',
-                    'sonido': 'Audio y Sonido',
-                    'perifericos': 'Periféricos',
-                    'windows': 'Windows y Sistema',
-                    'programas': 'Programas y Aplicaciones',
-                    'virus': 'Virus y Seguridad',
-                    'actualizaciones': 'Actualizaciones',
-                    'bateria': 'Batería y Energía',
-                    'senal': 'Señal y Conectividad',
-                    'aplicaciones': 'Aplicaciones y Apps'
+                    'hardware': {
+                        'encendido': 'Encendido y Arranque',
+                        'rendimiento': 'Rendimiento y Velocidad',
+                        'pantalla': 'Pantalla y Gráficos',
+                        'perifericos': 'Periféricos y Accesorios'
+                    },
+                    'software': {
+                        'windows': 'Windows y Sistema',
+                        'programas': 'Programas y Aplicaciones',
+                        'virus': 'Virus y Seguridad',
+                        'actualizaciones': 'Actualizaciones'
+                    },
+                    'internet': {
+                        'wifi': 'WiFi y Red Inalámbrica',
+                        'velocidad': 'Velocidad de Internet',
+                        'conexion': 'Conexión y Redes'
+                    },
+                    'movil': {
+                        'bateria': 'Batería y Energía',
+                        'senal': 'Señal y Conectividad',
+                        'aplicaciones': 'Aplicaciones y Apps'
+                    }
                 };
-                return nombres[subcategoria] || subcategoria;
+                return nombres[categoria]?.[subcategoria] || subcategoria;
             }
 
             getSubcategoryIcon(subcategoria) {
                 const icons = {
-                    'wifi': '📶', 'velocidad': '⚡', 'conexion': '🔗', 'juegos': '🎮', 'streaming': '📺',
-                    'encendido': '🔌', 'rendimiento': '🚀', 'pantalla': '🖥️', 'sonido': '🔊', 'perifericos': '🖱️',
+                    'encendido': '🔌', 'rendimiento': '🚀', 'pantalla': '🖥️', 'perifericos': '🖱️',
                     'windows': '🪟', 'programas': '📱', 'virus': '🛡️', 'actualizaciones': '🔄',
+                    'wifi': '📶', 'velocidad': '⚡', 'conexion': '🔗',
                     'bateria': '🔋', 'senal': '📡', 'aplicaciones': '📲'
                 };
                 return icons[subcategoria] || '🔧';
