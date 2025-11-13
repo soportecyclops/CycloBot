@@ -1,7 +1,8 @@
 // script.js - CYCLOPSBOT CON SUPABASE
 class CyclopsBotAvanzado {
     constructor() {
-        this.supabaseUrl = 'https://mapvbc.fbr.tkcf.psyj.xtl_supabase.co';
+        // CREDENCIALES CORRECTAS
+        this.supabaseUrl = 'https://nmpvbcfbrhtcfyovjzul.supabase.co';
         this.supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5tcHZiY2Zicmh0Y2Z5b3ZqenVsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMwMjQ0NjAsImV4cCI6MjA3ODYwMDQ2MH0.9-FalpRfqQmD_72ZDbVnBbN7EU7lwgzsX2zNWz8er_4';
         
         this.supabase = null;
@@ -14,7 +15,6 @@ class CyclopsBotAvanzado {
         this.initializeBot();
         this.setupEventListeners();
     }
-
     async initializeSupabase() {
         // Cargar Supabase desde CDN dinámicamente
         if (typeof supabase === 'undefined') {
