@@ -3,91 +3,346 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CyclopsBot - El Adivinador Técnico</title>
+    <title>CyclopsBot - Asistente Técnico con IA</title>
     <link rel="stylesheet" href="styles.css">
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Rajdhani:wght@300;400;500;600;700&family=Exo+2:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <div class="logo-container">
-                <div class="cyclops-eye">
-                    <div class="pupil"></div>
-                </div>
-                <h1>CyclopsBot</h1>
-            </div>
-            <p class="tagline">El adivinador técnico que diagnostica tus problemas informáticos</p>
-        </header>
+    <!-- Fondo con partículas -->
+    <div class="particles-background"></div>
+    
+    <!-- Efectos de neón -->
+    <div class="neon-glow"></div>
+    <div class="circuit-lines"></div>
 
-        <main>
-            <div class="chat-container">
-                <div class="chat-header">
-                    <h2>Diagnóstico en Progreso</h2>
-                    <div class="status-indicator">
-                        <span class="pulse"></span>
-                        <span>CyclopsBot está analizando...</span>
-                    </div>
-                </div>
-                
-                <div class="chat-messages" id="chatMessages">
-                    <div class="message bot-message">
-                        <div class="message-avatar">
-                            <div class="mini-eye"></div>
-                        </div>
-                        <div class="message-content">
-                            <p>¡Hola! Soy CyclopsBot, tu asistente técnico personal.</p>
-                            <p>Voy a hacerte algunas preguntas para diagnosticar tu problema. Piensa en el problema que tienes y yo intentaré adivinarlo.</p>
-                            <p>¿Estás listo para comenzar?</p>
+    <div class="container">
+        <!-- Header Mejorado -->
+        <header class="cyber-header">
+            <div class="header-glow"></div>
+            <div class="logo-container">
+                <div class="cyber-logo">
+                    <div class="hologram-effect">
+                        <div class="cyclops-eye-advanced">
+                            <div class="eye-outer-ring">
+                                <div class="eye-middle-ring">
+                                    <div class="eye-core">
+                                        <div class="pupil-advanced"></div>
+                                        <div class="scanning-beam"></div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
+                    <div class="digital-particles"></div>
                 </div>
-                
-                <div class="chat-input">
-                    <div class="input-container">
-                        <input type="text" id="userInput" placeholder="Describe tu problema o responde a la pregunta...">
-                        <button id="sendButton">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M22 2L11 13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                <path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                            </svg>
-                        </button>
-                    </div>
-                    <div class="quick-actions">
-                        <button class="quick-btn" data-action="start">Comenzar Diagnóstico</button>
-                        <button class="quick-btn" data-action="reset">Reiniciar</button>
+                <div class="title-container">
+                    <h1 class="cyber-title">
+                        <span class="title-glitch" data-text="CYCLOPSBOT">CYCLOPSBOT</span>
+                    </h1>
+                    <div class="subtitle-grid">
+                        <span class="subtitle-chip">SISTEMA DE DIAGNÓSTICO TÉCNICO IA</span>
+                        <span class="version-badge">v2.1.0</span>
                     </div>
                 </div>
             </div>
             
-            <div class="info-panel">
-                <h3>Problemas que puedo diagnosticar:</h3>
-                <ul>
-                    <li>📶 Problemas de Internet y WiFi</li>
-                    <li>💻 Fallas de Hardware</li>
-                    <li>🔧 Errores de Software</li>
-                    <li>📱 Problemas con Teléfonos Móviles</li>
-                    <li>🖥️ Configuraciones de Sistema</li>
-                </ul>
-                
-                <div class="stats">
-                    <div class="stat-item">
-                        <span class="stat-number" id="problemsCount">0</span>
-                        <span class="stat-label">Problemas en mi base</span>
+            <div class="status-panel">
+                <div class="status-grid">
+                    <div class="status-item online">
+                        <i class="fas fa-server"></i>
+                        <span>BASE DE DATOS</span>
+                        <div class="status-indicator active"></div>
                     </div>
-                    <div class="stat-item">
-                        <span class="stat-number" id="diagnosticsCount">0</span>
-                        <span class="stat-label">Diagnósticos realizados</span>
+                    <div class="status-item online">
+                        <i class="fas fa-brain"></i>
+                        <span>IA ACTIVA</span>
+                        <div class="status-indicator active"></div>
+                    </div>
+                    <div class="status-item online">
+                        <i class="fas fa-network-wired"></i>
+                        <span>SUPABASE</span>
+                        <div class="status-indicator active"></div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main class="cyber-main">
+            <!-- Panel de Chat Mejorado -->
+            <div class="cyber-chat-container">
+                <div class="chat-header-advanced">
+                    <div class="header-terminal">
+                        <div class="terminal-dots">
+                            <span class="dot red"></span>
+                            <span class="dot yellow"></span>
+                            <span class="dot green"></span>
+                        </div>
+                        <div class="terminal-title">
+                            <i class="fas fa-terminal"></i>
+                            <span>CONSOLA DE DIAGNÓSTICO - CYCLOPSBOT AI</span>
+                        </div>
+                    </div>
+                    <div class="diagnosis-progress">
+                        <div class="progress-label">
+                            <i class="fas fa-satellite-dish"></i>
+                            <span>ANALIZANDO PATRONES DE FALLA...</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progressFill"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Mensajes del Chat -->
+                <div class="cyber-chat-messages" id="chatMessages">
+                    <div class="message bot-message advanced">
+                        <div class="message-header">
+                            <div class="bot-avatar">
+                                <div class="avatar-core"></div>
+                                <div class="avatar-ring"></div>
+                            </div>
+                            <div class="message-meta">
+                                <span class="sender-name">CYCLOPS_AI</span>
+                                <span class="message-time" id="currentTime"></span>
+                            </div>
+                        </div>
+                        <div class="message-content-advanced">
+                            <div class="code-block">
+                                <div class="code-header">
+                                    <span>INICIALIZANDO SISTEMA...</span>
+                                </div>
+                                <div class="code-content">
+                                    <p>> ¡Hola! Soy <span class="highlight">CyclopsBot</span>, tu asistente técnico con IA.</p>
+                                    <p>> Sistema conectado a base de datos <span class="highlight">Supabase</span>.</p>
+                                    <p>> Motor de diagnóstico <span class="highlight">Akinator</span> activo.</p>
+                                    <p>> <span class="ready-text">LISTO PARA DIAGNOSTICAR</span></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Input Mejorado -->
+                <div class="cyber-chat-input">
+                    <div class="input-terminal">
+                        <div class="input-prefix">
+                            <span class="prompt-symbol">></span>
+                            <span class="user-prompt">USUARIO@DIAGNOSTICO:~$</span>
+                        </div>
+                        <input type="text" id="userInput" placeholder="DESCRIBE EL PROBLEMA TÉCNICO..." class="cyber-input">
+                        <button id="sendButton" class="cyber-send-btn">
+                            <i class="fas fa-paper-plane"></i>
+                            <span>EJECUTAR</span>
+                        </button>
+                    </div>
+                    
+                    <div class="quick-actions-advanced">
+                        <button class="cyber-btn primary" data-action="start">
+                            <i class="fas fa-play"></i>
+                            <span>INICIAR DIAGNÓSTICO</span>
+                        </button>
+                        <button class="cyber-btn secondary" data-action="reset">
+                            <i class="fas fa-redo"></i>
+                            <span>REINICIAR SISTEMA</span>
+                        </button>
+                        <button class="cyber-btn tertiary" data-action="help">
+                            <i class="fas fa-question"></i>
+                            <span>AYUDA</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Panel de Información Mejorado -->
+            <div class="cyber-info-panel">
+                <div class="panel-header">
+                    <i class="fas fa-chart-network"></i>
+                    <span>PANEL DE CONTROL</span>
+                </div>
+                
+                <div class="capabilities-grid">
+                    <h3 class="section-title">CAPACIDADES DE DIAGNÓSTICO</h3>
+                    <div class="capability-item">
+                        <div class="capability-icon">
+                            <i class="fas fa-wifi"></i>
+                        </div>
+                        <div class="capability-info">
+                            <span class="capability-title">REDES & INTERNET</span>
+                            <span class="capability-desc">WiFi, Router, DNS, VPN</span>
+                        </div>
+                    </div>
+                    <div class="capability-item">
+                        <div class="capability-icon">
+                            <i class="fas fa-microchip"></i>
+                        </div>
+                        <div class="capability-info">
+                            <span class="capability-title">HARDWARE</span>
+                            <span class="capability-desc">PC, Laptops, Periféricos</span>
+                        </div>
+                    </div>
+                    <div class="capability-item">
+                        <div class="capability-icon">
+                            <i class="fas fa-code"></i>
+                        </div>
+                        <div class="capability-info">
+                            <span class="capability-title">SOFTWARE</span>
+                            <span class="capability-desc">Windows, macOS, Linux</span>
+                        </div>
+                    </div>
+                    <div class="capability-item">
+                        <div class="capability-icon">
+                            <i class="fas fa-mobile-alt"></i>
+                        </div>
+                        <div class="capability-info">
+                            <span class="capability-title">DISPOSITIVOS MÓVILES</span>
+                            <span class="capability-desc">Android, iOS, Tablets</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="stats-advanced">
+                    <h3 class="section-title">ESTADÍSTICAS EN TIEMPO REAL</h3>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-database"></i>
+                            </div>
+                            <div class="stat-info">
+                                <span class="stat-number" id="problemsCount">0</span>
+                                <span class="stat-label">PROBLEMAS EN BASE</span>
+                            </div>
+                            <div class="stat-graph">
+                                <div class="graph-bar" style="height: 70%"></div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-bug"></i>
+                            </div>
+                            <div class="stat-info">
+                                <span class="stat-number" id="diagnosticsCount">0</span>
+                                <span class="stat-label">DIAGNÓSTICOS HOY</span>
+                            </div>
+                            <div class="stat-graph">
+                                <div class="graph-bar" style="height: 40%"></div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-bolt"></i>
+                            </div>
+                            <div class="stat-info">
+                                <span class="stat-number" id="successRate">98%</span>
+                                <span class="stat-label">EFECTIVIDAD</span>
+                            </div>
+                            <div class="stat-graph">
+                                <div class="graph-bar" style="height: 98%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="system-info">
+                    <div class="info-item">
+                        <i class="fas fa-shield-alt"></i>
+                        <span>Sistema seguro - Conexión encriptada</span>
+                    </div>
+                    <div class="info-item">
+                        <i class="fas fa-robot"></i>
+                        <span>IA de aprendizaje automático activa</span>
                     </div>
                 </div>
             </div>
         </main>
         
-        <footer>
-            <p>CyclopsBot v1.0 - Proyecto de Soporte Técnico Inteligente</p>
-            <p>Basado en tecnología tipo Akinator para diagnóstico técnico</p>
+        <!-- Footer Mejorado -->
+        <footer class="cyber-footer">
+            <div class="footer-grid">
+                <div class="footer-section">
+                    <div class="footer-title">CYCLOPSBOT AI</div>
+                    <p>Sistema avanzado de diagnóstico técnico con inteligencia artificial</p>
+                </div>
+                <div class="footer-section">
+                    <div class="footer-title">TECNOLOGÍAS</div>
+                    <div class="tech-tags">
+                        <span class="tech-tag">Supabase</span>
+                        <span class="tech-tag">PostgreSQL</span>
+                        <span class="tech-tag">Machine Learning</span>
+                        <span class="tech-tag">WebSocket</span>
+                    </div>
+                </div>
+                <div class="footer-section">
+                    <div class="footer-title">CONECTADO</div>
+                    <div class="connection-status">
+                        <i class="fas fa-cloud"></i>
+                        <span>Base de datos en la nube</span>
+                        <div class="pulse-dot"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <div class="copyright">
+                    © 2024 CyclopsBot AI - Sistema de Diagnóstico Técnico Inteligente
+                </div>
+                <div class="build-info">
+                    <span>Build: v2.1.0</span>
+                    <span> | </span>
+                    <span>Database: PostgreSQL</span>
+                    <span> | </span>
+                    <span>AI: Active Learning</span>
+                </div>
+            </div>
         </footer>
     </div>
 
+    <!-- Scripts -->
     <script src="script.js"></script>
+    
+    <!-- Script para efectos visuales -->
+    <script>
+        // Actualizar hora actual
+        function updateTime() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('es-ES', { 
+                hour: '2-digit', 
+                minute: '2-digit',
+                second: '2-digit'
+            });
+            const timeElement = document.getElementById('currentTime');
+            if (timeElement) {
+                timeElement.textContent = timeString;
+            }
+        }
+        
+        // Efectos de partículas
+        function createParticles() {
+            const particlesContainer = document.querySelector('.particles-background');
+            if (!particlesContainer) return;
+            
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + 'vw';
+                particle.style.animationDelay = Math.random() * 20 + 's';
+                particle.style.animationDuration = (Math.random() * 10 + 10) + 's';
+                particlesContainer.appendChild(particle);
+            }
+        }
+        
+        // Inicializar efectos
+        document.addEventListener('DOMContentLoaded', function() {
+            updateTime();
+            setInterval(updateTime, 1000);
+            createParticles();
+            
+            // Efecto de escritura para el primer mensaje
+            const firstMessage = document.querySelector('.code-content');
+            if (firstMessage) {
+                firstMessage.style.animation = 'typewriter 2s steps(40) 1s both';
+            }
+        });
+    </script>
 </body>
 </html>
