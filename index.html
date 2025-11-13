@@ -3,127 +3,805 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CyclopsBot - Asistente Técnico Inteligente</title>
+    <title>CyclopsBot - Asistente Técnico</title>
     <link rel="stylesheet" href="styles.css">
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Exo+2:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Rajdhani:wght@300;400;500;600;700&family=Exo+2:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        /* ESTILOS COMPACTOS MEJORADOS CON MEJOR LEGIBILIDAD */
-        body {
-            overflow: hidden;
-            height: 100vh;
-            font-size: 16px;
+        /* DISEÑO OPTIMIZADO Y RESPONSIVE */
+        :root {
+            --primary: #00f3ff;
+            --primary-glow: #00f3ffaa;
+            --secondary: #ff00ff;
+            --accent: #00ff88;
+            --dark: #0a0a1a;
+            --darker: #050510;
+            --cyber-blue: #0066ff;
+            --cyber-purple: #aa00ff;
+            --terminal-bg: #0a0a1a;
+            --terminal-border: #00f3ff;
+            --text-primary: #ffffff;
+            --text-secondary: #00f3ff;
+            --text-muted: #8899aa;
+            --success: #00ff88;
+            --warning: #ffaa00;
+            --danger: #ff0066;
         }
         
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Rajdhani', 'Exo 2', sans-serif;
+            background: linear-gradient(135deg, var(--darker) 0%, var(--dark) 50%, #1a1a2e 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+            overflow-y: auto;
+        }
+        
+        /* Fondo con partículas */
+        .particles-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+        }
+        
+        .particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: var(--primary-glow);
+            border-radius: 50%;
+            animation: float 20s infinite linear;
+        }
+        
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+        
+        /* Efectos de neón y circuitos */
+        .neon-glow {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80vw;
+            height: 80vh;
+            background: radial-gradient(circle, var(--primary-glow) 0%, transparent 70%);
+            opacity: 0.1;
+            z-index: -1;
+            pointer-events: none;
+        }
+        
+        .circuit-lines {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(90deg, transparent 99%, var(--primary-glow) 99%),
+                linear-gradient(0deg, transparent 99%, var(--primary-glow) 99%);
+            background-size: 50px 50px;
+            opacity: 0.03;
+            z-index: -1;
+            pointer-events: none;
+        }
+        
+        /* CONTENEDOR PRINCIPAL RESPONSIVE */
         .container {
-            height: 100vh;
-            padding: 16px;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 15px;
+            position: relative;
+            z-index: 1;
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            min-height: 100vh;
         }
         
+        /* HEADER COMPACTO */
         .cyber-header {
-            padding: 16px 20px !important;
-            flex-shrink: 0;
+            background: linear-gradient(135deg, rgba(10, 10, 26, 0.9) 0%, rgba(5, 5, 16, 0.95) 100%);
+            border: 1px solid var(--terminal-border);
+            border-radius: 12px;
+            padding: 10px 15px;
+            margin-bottom: 15px;
+            position: relative;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 0 20px rgba(0, 243, 255, 0.2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
         }
         
         .logo-container {
-            gap: 16px !important;
-            margin-bottom: 8px !important;
-        }
-        
-        .cyber-logo {
-            width: 50px !important;
-            height: 50px !important;
-        }
-        
-        .cyber-title {
-            font-size: 1.8rem !important;
-        }
-        
-        .cyber-main {
-            display: grid;
-            grid-template-columns: 2.5fr 1fr;
-            gap: 16px;
-            flex: 1;
-            min-height: 0;
-        }
-        
-        .cyber-chat-container {
             display: flex;
-            flex-direction: column;
-            min-height: 0;
-        }
-        
-        .chat-header-advanced {
-            padding: 12px 16px !important;
-            flex-shrink: 0;
-        }
-        
-        .cyber-chat-messages {
-            flex: 1;
-            max-height: none !important;
-            padding: 16px !important;
-            overflow-y: auto;
-            min-height: 0;
-            font-size: 1.05rem;
-        }
-        
-        .botones-area {
-            min-height: 150px;
-            max-height: 220px;
-            padding: 16px;
-            flex-shrink: 0;
-        }
-        
-        .cyber-chat-input {
-            padding: 12px 16px !important;
-            flex-shrink: 0;
-        }
-        
-        .cyber-info-panel {
-            padding: 16px !important;
-        }
-        
-        .cyber-footer {
-            padding: 12px 16px !important;
-            flex-shrink: 0;
-        }
-        
-        /* Mejoras específicas de legibilidad */
-        .message-content-advanced {
-            font-size: 1.1rem;
-            line-height: 1.5;
-        }
-        
-        .cyber-btn {
-            font-size: 1.05rem !important;
-            padding: 16px 20px !important;
-            min-height: 60px;
-        }
-        
-        .botones-grid {
+            align-items: center;
             gap: 12px;
         }
         
+        .cyber-logo {
+            position: relative;
+            width: 40px;
+            height: 40px;
+        }
+        
+        .hologram-effect {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            animation: hologramFloat 3s ease-in-out infinite;
+        }
+        
+        @keyframes hologramFloat {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-5px) rotate(180deg); }
+        }
+        
+        .cyclops-eye-advanced {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+        
+        .eye-outer-ring {
+            width: 100%;
+            height: 100%;
+            border: 2px solid var(--primary);
+            border-radius: 50%;
+            position: relative;
+            animation: rotate 10s linear infinite;
+        }
+        
+        .eye-middle-ring {
+            width: 70%;
+            height: 70%;
+            border: 1px solid var(--secondary);
+            border-radius: 50%;
+            position: absolute;
+            top: 15%;
+            left: 15%;
+            animation: rotate 8s linear infinite reverse;
+        }
+        
+        .eye-core {
+            width: 50%;
+            height: 50%;
+            background: radial-gradient(circle, var(--accent) 0%, var(--primary) 100%);
+            border-radius: 50%;
+            position: absolute;
+            top: 25%;
+            left: 25%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 15px var(--accent);
+        }
+        
+        .pupil-advanced {
+            width: 30%;
+            height: 30%;
+            background: var(--darker);
+            border-radius: 50%;
+            position: relative;
+        }
+        
+        .scanning-beam {
+            position: absolute;
+            bottom: -3px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 1px;
+            height: 15px;
+            background: var(--primary);
+            animation: scan 2s ease-in-out infinite;
+        }
+        
+        @keyframes scan {
+            0%, 100% { height: 0px; opacity: 0; }
+            50% { height: 20px; opacity: 1; }
+        }
+        
+        .title-container {
+            flex: 1;
+        }
+        
+        .cyber-title {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.5rem;
+            font-weight: 900;
+            background: linear-gradient(45deg, var(--primary), var(--secondary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 20px rgba(0, 243, 255, 0.5);
+            margin-bottom: 2px;
+        }
+        
+        .subtitle-grid {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .subtitle-chip {
+            background: linear-gradient(45deg, var(--dark), var(--darker));
+            border: 1px solid var(--primary);
+            padding: 3px 10px;
+            border-radius: 15px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: var(--primary);
+            text-shadow: 0 0 8px var(--primary-glow);
+        }
+        
+        .version-badge {
+            background: var(--accent);
+            color: var(--darker);
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.65rem;
+            font-weight: 700;
+        }
+        
+        /* Status Panel */
+        .status-panel {
+            margin-left: auto;
+        }
+        
+        .status-grid {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 4px 8px;
+            border-radius: 6px;
+            border: 1px solid rgba(0, 243, 255, 0.3);
+        }
+        
+        .status-item i {
+            color: var(--primary);
+            font-size: 0.8rem;
+        }
+        
+        .status-item span {
+            font-size: 0.65rem;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+        
+        /* MAIN CONTENT - DISEÑO RESPONSIVE */
+        .cyber-main {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 15px;
+            flex: 1;
+            margin-bottom: 15px;
+        }
+        
+        @media (max-width: 1024px) {
+            .cyber-main {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* CHAT CONTAINER OPTIMIZADO */
+        .cyber-chat-container {
+            background: linear-gradient(135deg, rgba(10, 10, 26, 0.9) 0%, rgba(5, 5, 16, 0.95) 100%);
+            border: 1px solid var(--terminal-border);
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 0 20px rgba(0, 243, 255, 0.15);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            min-height: 500px;
+        }
+        
+        .chat-header-advanced {
+            background: linear-gradient(90deg, var(--dark) 0%, var(--darker) 100%);
+            border-bottom: 1px solid var(--terminal-border);
+            padding: 10px 15px;
+        }
+        
+        .header-terminal {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .terminal-dots {
+            display: flex;
+            gap: 6px;
+        }
+        
+        .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+        
+        .dot.red { background: var(--danger); }
+        .dot.yellow { background: var(--warning); }
+        .dot.green { background: var(--success); }
+        
+        .terminal-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: 'Orbitron', monospace;
+            font-size: 0.8rem;
+            color: var(--primary);
+        }
+        
+        .terminal-title i {
+            font-size: 0.9rem;
+        }
+        
+        /* ÁREA DE MENSAJES OPTIMIZADA */
+        .cyber-chat-messages {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-height: 350px;
+        }
+        
+        .message {
+            animation: fadeIn 0.3s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .bot-message, .user-message {
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+        }
+        
+        .user-message {
+            flex-direction: row-reverse;
+        }
+        
+        .message-avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        
+        .bot-message .message-avatar {
+            background: linear-gradient(45deg, var(--primary), var(--cyber-blue));
+        }
+        
+        .user-message .message-avatar {
+            background: linear-gradient(45deg, var(--secondary), var(--cyber-purple));
+        }
+        
+        .mini-eye {
+            width: 15px;
+            height: 15px;
+            background: var(--darker);
+            border-radius: 50%;
+            position: relative;
+        }
+        
+        .mini-eye::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 6px;
+            height: 6px;
+            background: var(--accent);
+            border-radius: 50%;
+        }
+        
+        .message-content {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 10px 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(0, 243, 255, 0.2);
+            font-size: 0.85rem;
+            line-height: 1.3;
+        }
+        
+        .bot-message .message-content {
+            background: rgba(0, 243, 255, 0.05);
+            border-color: rgba(0, 243, 255, 0.3);
+        }
+        
+        .user-message .message-content {
+            background: rgba(255, 0, 255, 0.05);
+            border-color: rgba(255, 0, 255, 0.3);
+        }
+        
+        .message-content p {
+            margin: 3px 0;
+        }
+        
+        .message-content p:first-child {
+            margin-top: 0;
+        }
+        
+        .message-content p:last-child {
+            margin-bottom: 0;
+        }
+        
+        /* ÁREA DE BOTONES EXPANDIBLE */
+        .botones-area {
+            flex-shrink: 0;
+            min-height: 100px;
+            max-height: 180px;
+            overflow-y: auto;
+            border-top: 1px solid rgba(0, 243, 255, 0.2);
+            padding: 10px;
+            background: rgba(5, 5, 16, 0.6);
+        }
+        
+        .botones-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+        }
+        
+        .boton-categoria {
+            padding: 8px 10px !important;
+            font-size: 0.75rem !important;
+            text-align: left;
+            height: auto;
+            min-height: 36px;
+        }
+        
+        /* Botones de Control */
+        .cyber-chat-input {
+            background: rgba(5, 5, 16, 0.8);
+            border-top: 1px solid var(--terminal-border);
+            padding: 12px 15px;
+        }
+        
+        .quick-actions-advanced {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        
+        .cyber-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 6px;
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.75rem;
+        }
+        
+        .cyber-btn.primary {
+            background: linear-gradient(45deg, var(--primary), var(--cyber-blue));
+            color: var(--darker);
+        }
+        
+        .cyber-btn.secondary {
+            background: transparent;
+            border: 1px solid var(--primary);
+            color: var(--primary);
+        }
+        
+        .cyber-btn.tertiary {
+            background: transparent;
+            border: 1px solid var(--text-muted);
+            color: var(--text-muted);
+        }
+        
+        .cyber-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 243, 255, 0.3);
+        }
+        
+        /* PANEL LATERAL COMPACTO */
+        .cyber-info-panel {
+            background: linear-gradient(135deg, rgba(10, 10, 26, 0.9) 0%, rgba(5, 5, 16, 0.95) 100%);
+            border: 1px solid var(--terminal-border);
+            border-radius: 12px;
+            padding: 15px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 0 20px rgba(0, 243, 255, 0.15);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .panel-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(0, 243, 255, 0.2);
+            font-family: 'Orbitron', monospace;
+            color: var(--primary);
+            font-size: 0.9rem;
+        }
+        
+        .section-title {
+            font-family: 'Orbitron', monospace;
+            color: var(--primary);
+            font-size: 0.8rem;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+        
+        .stats-advanced {
+            margin-bottom: 15px;
+        }
+        
+        .stats-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .stat-card {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(0, 243, 255, 0.1);
+            border-radius: 8px;
+        }
+        
+        .stat-icon {
+            width: 35px;
+            height: 35px;
+            background: linear-gradient(45deg, var(--primary), var(--cyber-blue));
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .stat-icon i {
+            color: var(--darker);
+            font-size: 1rem;
+        }
+        
+        .stat-info {
+            flex: 1;
+        }
+        
         .stat-number {
-            font-size: 1.8rem !important;
+            display: block;
+            font-family: 'Orbitron', monospace;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 2px;
+        }
+        
+        .stat-label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+        
+        .capabilities-grid {
+            flex: 1;
+        }
+        
+        .capability-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px;
+            margin-bottom: 6px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 6px;
+            border: 1px solid rgba(0, 243, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .capability-item:hover {
+            border-color: var(--primary);
+            transform: translateX(3px);
+        }
+        
+        .capability-icon {
+            width: 30px;
+            height: 30px;
+            background: rgba(0, 243, 255, 0.1);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .capability-icon i {
+            color: var(--primary);
+            font-size: 0.9rem;
+        }
+        
+        .capability-info {
+            flex: 1;
         }
         
         .capability-title {
-            font-size: 1.1rem !important;
+            display: block;
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 0.8rem;
+        }
+        
+        /* FOOTER COMPACTO */
+        .cyber-footer {
+            background: linear-gradient(135deg, rgba(10, 10, 26, 0.9) 0%, rgba(5, 5, 16, 0.95) 100%);
+            border: 1px solid var(--terminal-border);
+            border-radius: 12px;
+            padding: 10px 15px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 0 20px rgba(0, 243, 255, 0.15);
+        }
+        
+        .footer-bottom {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .copyright {
+            color: var(--text-muted);
+            font-size: 0.7rem;
+        }
+        
+        .build-info {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+        }
+        
+        /* SCROLLBARS MINIMALISTAS */
+        .cyber-chat-messages::-webkit-scrollbar,
+        .botones-area::-webkit-scrollbar {
+            width: 4px;
+        }
+        
+        .cyber-chat-messages::-webkit-scrollbar-track,
+        .botones-area::-webkit-scrollbar-track {
+            background: rgba(0, 243, 255, 0.1);
+            border-radius: 2px;
+        }
+        
+        .cyber-chat-messages::-webkit-scrollbar-thumb,
+        .botones-area::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 2px;
+        }
+        
+        /* ROTACIÓN CONTINUA */
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        /* RESPONSIVE PARA DISPOSITIVOS MÓVILES */
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .cyber-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            
+            .status-panel {
+                margin-left: 0;
+                width: 100%;
+            }
+            
+            .status-grid {
+                justify-content: space-between;
+            }
+            
+            .cyber-title {
+                font-size: 1.3rem;
+            }
+            
+            .cyber-main {
+                gap: 10px;
+            }
+            
+            .cyber-chat-messages {
+                max-height: 300px;
+                padding: 10px;
+            }
+            
+            .botones-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .footer-bottom {
+                flex-direction: column;
+                gap: 5px;
+                text-align: center;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .cyber-title {
+                font-size: 1.1rem;
+            }
+            
+            .logo-container {
+                gap: 8px;
+            }
+            
+            .cyber-logo {
+                width: 35px;
+                height: 35px;
+            }
+            
+            .quick-actions-advanced {
+                flex-direction: column;
+            }
+            
+            .cyber-btn {
+                width: 100%;
+                justify-content: center;
+            }
         }
     </style>
 </head>
 <body>
-    <!-- Fondos sutiles -->
+    <!-- Fondo con partículas -->
     <div class="particles-background"></div>
-    <div class="gradient-background"></div>
+    <div class="neon-glow"></div>
+    <div class="circuit-lines"></div>
 
     <div class="container">
-        <!-- Header Accesible -->
+        <!-- Header Compacto -->
         <header class="cyber-header">
             <div class="logo-container">
                 <div class="cyber-logo">
@@ -143,8 +821,8 @@
                 <div class="title-container">
                     <h1 class="cyber-title">CYCLOPSBOT</h1>
                     <div class="subtitle-grid">
-                        <span class="subtitle-chip">ASISTENTE TÉCNICO INTELIGENTE</span>
-                        <span class="version-badge">v2.2</span>
+                        <span class="subtitle-chip">DIAGNÓSTICO INTELIGENTE</span>
+                        <span class="version-badge">v2.2.0</span>
                     </div>
                 </div>
             </div>
@@ -153,25 +831,22 @@
                 <div class="status-grid">
                     <div class="status-item online">
                         <i class="fas fa-server"></i>
-                        <span>CONECTADO</span>
-                        <div class="status-indicator active"></div>
+                        <span>BD</span>
                     </div>
                     <div class="status-item online">
                         <i class="fas fa-brain"></i>
-                        <span>INTELIGENCIA ACTIVA</span>
-                        <div class="status-indicator active"></div>
+                        <span>IA</span>
                     </div>
                     <div class="status-item online">
-                        <i class="fas fa-database"></i>
-                        <span>BASE DE DATOS</span>
-                        <div class="status-indicator active"></div>
+                        <i class="fas fa-network-wired"></i>
+                        <span>ONLINE</span>
                     </div>
                 </div>
             </div>
         </header>
 
         <main class="cyber-main">
-            <!-- Chat Principal -->
+            <!-- Chat Principal con Área de Botones Expandible -->
             <div class="cyber-chat-container">
                 <div class="chat-header-advanced">
                     <div class="header-terminal">
@@ -181,24 +856,27 @@
                             <span class="dot green"></span>
                         </div>
                         <div class="terminal-title">
-                            <i class="fas fa-comments"></i>
-                            <span>DIAGNÓSTICO INTELIGENTE</span>
+                            <i class="fas fa-terminal"></i>
+                            <span>CONSOLA DE DIAGNÓSTICO</span>
                         </div>
                     </div>
                 </div>
                 
-                <!-- Área de Mensajes -->
+                <!-- Área de Mensajes - Scrollable -->
                 <div class="cyber-chat-messages" id="chatMessages">
-                    <div class="message bot-message advanced">
-                        <div class="message-content-advanced">
-                            <p>👋 <strong>¡Bienvenido a CyclopsBot!</strong></p>
-                            <p>Soy tu asistente técnico inteligente. Te ayudaré a diagnosticar y resolver problemas tecnológicos paso a paso.</p>
-                            <p>📍 <em>Selecciona una categoría para comenzar</em></p>
+                    <div class="message bot-message">
+                        <div class="message-avatar">
+                            <div class="mini-eye"></div>
+                        </div>
+                        <div class="message-content">
+                            <p>👁️ <strong>CYCLOPSBOT ACTIVADO</strong></p>
+                            <p>🎯 <strong>Sistema de refinamiento progresivo activo</strong></p>
+                            <p>🔍 <strong>Selecciona el tipo de problema:</strong></p>
                         </div>
                     </div>
                 </div>
                 
-                <!-- Área de Botones Dedicada -->
+                <!-- Área de Botones Dedicada - Siempre visible -->
                 <div class="botones-area" id="botonesArea">
                     <!-- Los botones aparecerán aquí -->
                 </div>
@@ -207,26 +885,26 @@
                 <div class="cyber-chat-input">
                     <div class="quick-actions-advanced">
                         <button class="cyber-btn primary" data-action="start">
-                            <i class="fas fa-play-circle"></i>
-                            <span>INICIAR DIAGNÓSTICO</span>
+                            <i class="fas fa-play"></i>
+                            <span>INICIAR</span>
                         </button>
                         <button class="cyber-btn secondary" data-action="reset">
-                            <i class="fas fa-refresh"></i>
+                            <i class="fas fa-redo"></i>
                             <span>REINICIAR</span>
                         </button>
                         <button class="cyber-btn tertiary" data-action="help">
-                            <i class="fas fa-info-circle"></i>
+                            <i class="fas fa-question"></i>
                             <span>AYUDA</span>
                         </button>
                     </div>
                 </div>
             </div>
             
-            <!-- Panel Informativo -->
+            <!-- Panel Lateral Compacto -->
             <div class="cyber-info-panel">
                 <div class="panel-header">
-                    <i class="fas fa-chart-line"></i>
-                    <span>INFORMACIÓN DEL SISTEMA</span>
+                    <i class="fas fa-chart-network"></i>
+                    <span>PANEL</span>
                 </div>
                 
                 <div class="stats-advanced">
@@ -234,52 +912,49 @@
                     <div class="stats-grid">
                         <div class="stat-card">
                             <div class="stat-icon">
-                                <i class="fas fa-tasks"></i>
+                                <i class="fas fa-database"></i>
                             </div>
                             <div class="stat-info">
                                 <span class="stat-number" id="problemsCount">0</span>
-                                <span class="stat-label">PROBLEMAS EN BASE</span>
+                                <span class="stat-label">PROBLEMAS</span>
                             </div>
                         </div>
                         <div class="stat-card">
                             <div class="stat-icon">
-                                <i class="fas fa-stethoscope"></i>
+                                <i class="fas fa-bug"></i>
                             </div>
                             <div class="stat-info">
                                 <span class="stat-number" id="diagnosticsCount">0</span>
-                                <span class="stat-label">DIAGNÓSTICOS REALIZADOS</span>
+                                <span class="stat-label">DIAGNÓSTICOS</span>
                             </div>
                         </div>
                     </div>
                 </div>
                 
                 <div class="capabilities-grid">
-                    <h3 class="section-title">ÁREAS DE AYUDA</h3>
+                    <h3 class="section-title">CATEGORÍAS</h3>
                     <div class="capability-item">
                         <div class="capability-icon">
                             <i class="fas fa-wifi"></i>
                         </div>
                         <div class="capability-info">
-                            <span class="capability-title">Internet & Redes</span>
-                            <span class="capability-desc">WiFi, conexión, velocidad</span>
+                            <span class="capability-title">INTERNET</span>
                         </div>
                     </div>
                     <div class="capability-item">
                         <div class="capability-icon">
-                            <i class="fas fa-desktop"></i>
+                            <i class="fas fa-microchip"></i>
                         </div>
                         <div class="capability-info">
-                            <span class="capability-title">Hardware & PC</span>
-                            <span class="capability-desc">Equipos, componentes</span>
+                            <span class="capability-title">HARDWARE</span>
                         </div>
                     </div>
                     <div class="capability-item">
                         <div class="capability-icon">
-                            <i class="fas fa-cog"></i>
+                            <i class="fas fa-code"></i>
                         </div>
                         <div class="capability-info">
-                            <span class="capability-title">Software & Sistema</span>
-                            <span class="capability-desc">Programas, Windows</span>
+                            <span class="capability-title">SOFTWARE</span>
                         </div>
                     </div>
                     <div class="capability-item">
@@ -287,22 +962,21 @@
                             <i class="fas fa-mobile-alt"></i>
                         </div>
                         <div class="capability-info">
-                            <span class="capability-title">Dispositivos Móviles</span>
-                            <span class="capability-desc">Celulares, tablets</span>
+                            <span class="capability-title">MÓVILES</span>
                         </div>
                     </div>
                 </div>
             </div>
         </main>
         
-        <!-- Footer Informativo -->
+        <!-- Footer Compacto -->
         <footer class="cyber-footer">
             <div class="footer-bottom">
                 <div class="copyright">
-                    © 2024 CyclopsBot - Sistema de Diagnóstico Técnico Inteligente
+                    © 2024 CyclopsBot - Diagnóstico Inteligente
                 </div>
                 <div class="build-info">
-                    <span>Versión 2.2 | Tecnología Supabase | Diseño Accesible</span>
+                    v2.2.0 | Refinamiento Progresivo
                 </div>
             </div>
         </footer>
@@ -312,17 +986,17 @@
     <script src="script.js"></script>
     
     <script>
-        // Efectos de partículas sutiles
+        // Efectos de partículas mínimos
         function createParticles() {
             const particlesContainer = document.querySelector('.particles-background');
             if (!particlesContainer) return;
             
-            for (let i = 0; i < 25; i++) {
+            for (let i = 0; i < 15; i++) {
                 const particle = document.createElement('div');
                 particle.className = 'particle';
                 particle.style.left = Math.random() * 100 + 'vw';
-                particle.style.animationDelay = Math.random() * 15 + 's';
-                particle.style.animationDuration = (Math.random() * 8 + 8) + 's';
+                particle.style.animationDelay = Math.random() * 10 + 's';
+                particle.style.animationDuration = (Math.random() * 6 + 6) + 's';
                 particlesContainer.appendChild(particle);
             }
         }
