@@ -3,66 +3,50 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CyclopsBot - Asistente Técnico</title>
+    <title>CyclopsBot - Asistente Técnico Inteligente</title>
     <link rel="stylesheet" href="styles.css">
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Rajdhani:wght@300;400;500;600;700&family=Exo+2:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Exo+2:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        /* DISEÑO MEJORADO CON ÁREA EXPANDIBLE */
+        /* ESTILOS COMPACTOS MEJORADOS CON MEJOR LEGIBILIDAD */
         body {
             overflow: hidden;
             height: 100vh;
-            margin: 0;
-            padding: 0;
+            font-size: 16px;
         }
         
         .container {
             height: 100vh;
-            padding: 8px;
+            padding: 16px;
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 12px;
         }
         
         .cyber-header {
-            padding: 6px 12px !important;
+            padding: 16px 20px !important;
             flex-shrink: 0;
         }
         
         .logo-container {
-            gap: 8px !important;
-            margin-bottom: 4px !important;
+            gap: 16px !important;
+            margin-bottom: 8px !important;
         }
         
         .cyber-logo {
-            width: 35px !important;
-            height: 35px !important;
+            width: 50px !important;
+            height: 50px !important;
         }
         
         .cyber-title {
-            font-size: 1.2rem !important;
-            margin-bottom: 0 !important;
-        }
-        
-        .subtitle-chip {
-            font-size: 0.65rem !important;
-            padding: 2px 6px !important;
-        }
-        
-        .status-grid {
-            gap: 6px !important;
-        }
-        
-        .status-item {
-            padding: 2px 5px !important;
-            font-size: 0.55rem !important;
+            font-size: 1.8rem !important;
         }
         
         .cyber-main {
             display: grid;
             grid-template-columns: 2.5fr 1fr;
-            gap: 8px;
+            gap: 16px;
             flex: 1;
             min-height: 0;
         }
@@ -74,116 +58,72 @@
         }
         
         .chat-header-advanced {
-            padding: 6px 10px !important;
+            padding: 12px 16px !important;
             flex-shrink: 0;
         }
         
         .cyber-chat-messages {
             flex: 1;
             max-height: none !important;
-            padding: 8px !important;
+            padding: 16px !important;
             overflow-y: auto;
             min-height: 0;
-            display: flex;
-            flex-direction: column;
+            font-size: 1.05rem;
         }
         
-        /* Área de botones expandible */
         .botones-area {
+            min-height: 150px;
+            max-height: 220px;
+            padding: 16px;
             flex-shrink: 0;
-            min-height: 120px;
-            max-height: 200px;
-            overflow-y: auto;
-            border-top: 1px solid rgba(0, 243, 255, 0.2);
-            padding: 8px;
-            background: rgba(5, 5, 16, 0.6);
         }
         
         .cyber-chat-input {
-            padding: 6px 10px !important;
+            padding: 12px 16px !important;
             flex-shrink: 0;
-        }
-        
-        .quick-actions-advanced {
-            gap: 5px !important;
-        }
-        
-        .cyber-btn {
-            padding: 6px 10px !important;
-            font-size: 0.7rem !important;
         }
         
         .cyber-info-panel {
-            padding: 8px !important;
-            display: flex;
-            flex-direction: column;
-            min-height: 0;
-        }
-        
-        .panel-header {
-            margin-bottom: 8px !important;
-            padding-bottom: 6px !important;
-            flex-shrink: 0;
-        }
-        
-        .stats-advanced, .capabilities-grid {
-            flex-shrink: 0;
+            padding: 16px !important;
         }
         
         .cyber-footer {
-            padding: 6px 12px !important;
+            padding: 12px 16px !important;
             flex-shrink: 0;
         }
         
-        /* Mensajes compactos */
-        .message {
-            margin-bottom: 4px !important;
-            padding: 4px 8px !important;
-            flex-shrink: 0;
+        /* Mejoras específicas de legibilidad */
+        .message-content-advanced {
+            font-size: 1.1rem;
+            line-height: 1.5;
         }
         
-        .message-content-advanced p {
-            margin: 1px 0 !important;
-            font-size: 0.8rem;
+        .cyber-btn {
+            font-size: 1.05rem !important;
+            padding: 16px 20px !important;
+            min-height: 60px;
         }
         
-        /* Botones en grid para mejor organización */
         .botones-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 4px;
-            margin-top: 6px;
+            gap: 12px;
         }
         
-        .boton-categoria {
-            padding: 6px 8px !important;
-            font-size: 0.75rem !important;
-            text-align: left;
-            height: auto;
-            min-height: 32px;
+        .stat-number {
+            font-size: 1.8rem !important;
         }
         
-        /* Scrollbars minimalistas */
-        .cyber-chat-messages::-webkit-scrollbar,
-        .botones-area::-webkit-scrollbar {
-            width: 3px;
-        }
-        
-        .cyber-chat-messages::-webkit-scrollbar-thumb,
-        .botones-area::-webkit-scrollbar-thumb {
-            background: var(--primary);
-            border-radius: 2px;
+        .capability-title {
+            font-size: 1.1rem !important;
         }
     </style>
 </head>
 <body>
-    <!-- Fondo con partículas -->
+    <!-- Fondos sutiles -->
     <div class="particles-background"></div>
-    <div class="neon-glow"></div>
-    <div class="circuit-lines"></div>
+    <div class="gradient-background"></div>
 
     <div class="container">
-        <!-- Header Ultra Compacto -->
+        <!-- Header Accesible -->
         <header class="cyber-header">
             <div class="logo-container">
                 <div class="cyber-logo">
@@ -203,8 +143,8 @@
                 <div class="title-container">
                     <h1 class="cyber-title">CYCLOPSBOT</h1>
                     <div class="subtitle-grid">
-                        <span class="subtitle-chip">DIAGNÓSTICO INTELIGENTE</span>
-                        <span class="version-badge">v2.2.0</span>
+                        <span class="subtitle-chip">ASISTENTE TÉCNICO INTELIGENTE</span>
+                        <span class="version-badge">v2.2</span>
                     </div>
                 </div>
             </div>
@@ -213,22 +153,25 @@
                 <div class="status-grid">
                     <div class="status-item online">
                         <i class="fas fa-server"></i>
-                        <span>BD</span>
+                        <span>CONECTADO</span>
+                        <div class="status-indicator active"></div>
                     </div>
                     <div class="status-item online">
                         <i class="fas fa-brain"></i>
-                        <span>IA</span>
+                        <span>INTELIGENCIA ACTIVA</span>
+                        <div class="status-indicator active"></div>
                     </div>
                     <div class="status-item online">
-                        <i class="fas fa-network-wired"></i>
-                        <span>ONLINE</span>
+                        <i class="fas fa-database"></i>
+                        <span>BASE DE DATOS</span>
+                        <div class="status-indicator active"></div>
                     </div>
                 </div>
             </div>
         </header>
 
         <main class="cyber-main">
-            <!-- Chat Principal con Área de Botones Expandible -->
+            <!-- Chat Principal -->
             <div class="cyber-chat-container">
                 <div class="chat-header-advanced">
                     <div class="header-terminal">
@@ -238,24 +181,24 @@
                             <span class="dot green"></span>
                         </div>
                         <div class="terminal-title">
-                            <i class="fas fa-terminal"></i>
-                            <span>CONSOLA DE DIAGNÓSTICO</span>
+                            <i class="fas fa-comments"></i>
+                            <span>DIAGNÓSTICO INTELIGENTE</span>
                         </div>
                     </div>
                 </div>
                 
-                <!-- Área de Mensajes - Scrollable -->
+                <!-- Área de Mensajes -->
                 <div class="cyber-chat-messages" id="chatMessages">
                     <div class="message bot-message advanced">
                         <div class="message-content-advanced">
-                            <p>> <span class="ready-text">SISTEMA INICIADO</span></p>
-                            <p>> Motor de refinamiento progresivo activo</p>
-                            <p>> Base de datos conectada</p>
+                            <p>👋 <strong>¡Bienvenido a CyclopsBot!</strong></p>
+                            <p>Soy tu asistente técnico inteligente. Te ayudaré a diagnosticar y resolver problemas tecnológicos paso a paso.</p>
+                            <p>📍 <em>Selecciona una categoría para comenzar</em></p>
                         </div>
                     </div>
                 </div>
                 
-                <!-- Área de Botones Dedicada - Siempre visible -->
+                <!-- Área de Botones Dedicada -->
                 <div class="botones-area" id="botonesArea">
                     <!-- Los botones aparecerán aquí -->
                 </div>
@@ -264,26 +207,26 @@
                 <div class="cyber-chat-input">
                     <div class="quick-actions-advanced">
                         <button class="cyber-btn primary" data-action="start">
-                            <i class="fas fa-play"></i>
-                            <span>INICIAR</span>
+                            <i class="fas fa-play-circle"></i>
+                            <span>INICIAR DIAGNÓSTICO</span>
                         </button>
                         <button class="cyber-btn secondary" data-action="reset">
-                            <i class="fas fa-redo"></i>
+                            <i class="fas fa-refresh"></i>
                             <span>REINICIAR</span>
                         </button>
                         <button class="cyber-btn tertiary" data-action="help">
-                            <i class="fas fa-question"></i>
+                            <i class="fas fa-info-circle"></i>
                             <span>AYUDA</span>
                         </button>
                     </div>
                 </div>
             </div>
             
-            <!-- Panel Lateral Compacto -->
+            <!-- Panel Informativo -->
             <div class="cyber-info-panel">
                 <div class="panel-header">
-                    <i class="fas fa-chart-network"></i>
-                    <span>PANEL</span>
+                    <i class="fas fa-chart-line"></i>
+                    <span>INFORMACIÓN DEL SISTEMA</span>
                 </div>
                 
                 <div class="stats-advanced">
@@ -291,49 +234,52 @@
                     <div class="stats-grid">
                         <div class="stat-card">
                             <div class="stat-icon">
-                                <i class="fas fa-database"></i>
+                                <i class="fas fa-tasks"></i>
                             </div>
                             <div class="stat-info">
                                 <span class="stat-number" id="problemsCount">0</span>
-                                <span class="stat-label">PROBLEMAS</span>
+                                <span class="stat-label">PROBLEMAS EN BASE</span>
                             </div>
                         </div>
                         <div class="stat-card">
                             <div class="stat-icon">
-                                <i class="fas fa-bug"></i>
+                                <i class="fas fa-stethoscope"></i>
                             </div>
                             <div class="stat-info">
                                 <span class="stat-number" id="diagnosticsCount">0</span>
-                                <span class="stat-label">DIAGNÓSTICOS</span>
+                                <span class="stat-label">DIAGNÓSTICOS REALIZADOS</span>
                             </div>
                         </div>
                     </div>
                 </div>
                 
                 <div class="capabilities-grid">
-                    <h3 class="section-title">CATEGORÍAS</h3>
+                    <h3 class="section-title">ÁREAS DE AYUDA</h3>
                     <div class="capability-item">
                         <div class="capability-icon">
                             <i class="fas fa-wifi"></i>
                         </div>
                         <div class="capability-info">
-                            <span class="capability-title">INTERNET</span>
+                            <span class="capability-title">Internet & Redes</span>
+                            <span class="capability-desc">WiFi, conexión, velocidad</span>
                         </div>
                     </div>
                     <div class="capability-item">
                         <div class="capability-icon">
-                            <i class="fas fa-microchip"></i>
+                            <i class="fas fa-desktop"></i>
                         </div>
                         <div class="capability-info">
-                            <span class="capability-title">HARDWARE</span>
+                            <span class="capability-title">Hardware & PC</span>
+                            <span class="capability-desc">Equipos, componentes</span>
                         </div>
                     </div>
                     <div class="capability-item">
                         <div class="capability-icon">
-                            <i class="fas fa-code"></i>
+                            <i class="fas fa-cog"></i>
                         </div>
                         <div class="capability-info">
-                            <span class="capability-title">SOFTWARE</span>
+                            <span class="capability-title">Software & Sistema</span>
+                            <span class="capability-desc">Programas, Windows</span>
                         </div>
                     </div>
                     <div class="capability-item">
@@ -341,21 +287,22 @@
                             <i class="fas fa-mobile-alt"></i>
                         </div>
                         <div class="capability-info">
-                            <span class="capability-title">MÓVILES</span>
+                            <span class="capability-title">Dispositivos Móviles</span>
+                            <span class="capability-desc">Celulares, tablets</span>
                         </div>
                     </div>
                 </div>
             </div>
         </main>
         
-        <!-- Footer Ultra Compacto -->
+        <!-- Footer Informativo -->
         <footer class="cyber-footer">
             <div class="footer-bottom">
-                <div class="copyright" style="font-size: 0.65rem;">
-                    © 2024 CyclopsBot - Diagnóstico Inteligente
+                <div class="copyright">
+                    © 2024 CyclopsBot - Sistema de Diagnóstico Técnico Inteligente
                 </div>
-                <div class="build-info" style="font-size: 0.6rem;">
-                    v2.2.0 | Refinamiento Progresivo
+                <div class="build-info">
+                    <span>Versión 2.2 | Tecnología Supabase | Diseño Accesible</span>
                 </div>
             </div>
         </footer>
@@ -365,17 +312,17 @@
     <script src="script.js"></script>
     
     <script>
-        // Efectos de partículas mínimos
+        // Efectos de partículas sutiles
         function createParticles() {
             const particlesContainer = document.querySelector('.particles-background');
             if (!particlesContainer) return;
             
-            for (let i = 0; i < 15; i++) {
+            for (let i = 0; i < 25; i++) {
                 const particle = document.createElement('div');
                 particle.className = 'particle';
                 particle.style.left = Math.random() * 100 + 'vw';
-                particle.style.animationDelay = Math.random() * 10 + 's';
-                particle.style.animationDuration = (Math.random() * 6 + 6) + 's';
+                particle.style.animationDelay = Math.random() * 15 + 's';
+                particle.style.animationDuration = (Math.random() * 8 + 8) + 's';
                 particlesContainer.appendChild(particle);
             }
         }
