@@ -1,4 +1,4 @@
-// script.js - CYCLOPSBOT CON INTERACCIÓN POR BOTONES
+// script.js - CYCLOPSBOT CON INTERACCIÓN POR BOTONES - COMPACTO
 class CyclopsBotAvanzado {
     constructor() {
         // CREDENCIALES SUPABASE
@@ -45,22 +45,20 @@ class CyclopsBotAvanzado {
 
     async initializeBot() {
         await this.initializeSupabase();
-        this.addMessage('bot', '👁️ **CYCLOPSBOT ACTIVADO** - Sistema de Diagnóstico Técnico');
-        this.addMessage('bot', '🔍 **Base de datos conectada** - Motor de IA listo');
-        this.addMessage('bot', '🎯 **Selecciona una categoría** para comenzar el diagnóstico:');
+        this.addMessage('bot', '👁️ **CYCLOPSBOT ACTIVADO**');
+        this.addMessage('bot', '🔍 **Selecciona una categoría:**');
         
         await this.mostrarCategorias();
         this.updateStats();
+        
+        // Forzar scroll al final
+        setTimeout(() => {
+            const chatMessages = document.getElementById('chatMessages');
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }, 100);
     }
 
     setupEventListeners() {
-        // Eliminar event listeners de texto existentes
-        const userInput = document.getElementById('userInput');
-        const sendButton = document.getElementById('sendButton');
-        
-        if (userInput) userInput.style.display = 'none';
-        if (sendButton) sendButton.style.display = 'none';
-
         // Configurar botones de acción rápida
         document.querySelectorAll('.cyber-btn').forEach(button => {
             button.addEventListener('click', (e) => {
@@ -86,7 +84,7 @@ class CyclopsBotAvanzado {
 
         } catch (error) {
             console.error('Error cargando categorías:', error);
-            this.addMessage('bot', '❌ Error al cargar categorías. Intenta recargar la página.');
+            this.addMessage('bot', '❌ Error al cargar categorías.');
         }
     }
 
@@ -101,14 +99,6 @@ class CyclopsBotAvanzado {
             );
             buttonContainer.appendChild(boton);
         });
-
-        // Botón de ayuda
-        const ayudaBoton = this.crearBoton(
-            '❓ No estoy seguro / Ayuda',
-            () => this.mostrarAyuda(),
-            'secondary'
-        );
-        buttonContainer.appendChild(ayudaBoton);
     }
 
     getCategoryIcon(categoria) {
@@ -116,9 +106,7 @@ class CyclopsBotAvanzado {
             'internet': '🌐',
             'hardware': '💻', 
             'software': '🧩',
-            'movil': '📱',
-            'redes': '📡',
-            'sistema': '⚙️'
+            'movil': '📱'
         };
         return icons[categoria] || '🔧';
     }
@@ -128,9 +116,7 @@ class CyclopsBotAvanzado {
             'internet': 'Internet & Redes',
             'hardware': 'Hardware & PC',
             'software': 'Software & Sistema',
-            'movil': 'Dispositivos Móviles',
-            'redes': 'Redes & Conectividad',
-            'sistema': 'Sistema Operativo'
+            'movil': 'Dispositivos Móviles'
         };
         return displayNames[categoria] || categoria;
     }
@@ -184,7 +170,7 @@ class CyclopsBotAvanzado {
 
         } catch (error) {
             console.error('Error cargando problemas:', error);
-            this.addMessage('bot', '❌ Error al cargar problemas. Intenta nuevamente.');
+            this.addMessage('bot', '❌ Error al cargar problemas.');
         }
     }
 
@@ -194,7 +180,7 @@ class CyclopsBotAvanzado {
         this.userAnswers = [];
         
         this.addMessage('user', `Problema: ${problema.descripcion}`);
-        this.addMessage('bot', '🎯 **Iniciando diagnóstico guiado...**');
+        this.addMessage('bot', '🎯 **Diagnóstico guiado...**');
 
         // Obtener el problema completo con preguntas
         try {
@@ -211,7 +197,7 @@ class CyclopsBotAvanzado {
 
         } catch (error) {
             console.error('Error cargando preguntas:', error);
-            this.addMessage('bot', '❌ Error al cargar el diagnóstico. Intenta nuevamente.');
+            this.addMessage('bot', '❌ Error al cargar el diagnóstico.');
         }
     }
 
@@ -222,7 +208,7 @@ class CyclopsBotAvanzado {
         }
 
         const pregunta = this.currentProblem.preguntas[this.currentQuestionIndex];
-        this.addMessage('bot', `❓ **Pregunta ${this.currentQuestionIndex + 1}/${this.currentProblem.preguntas.length}:**\n${pregunta}`);
+        this.addMessage('bot', `❓ **Pregunta ${this.currentQuestionIndex + 1}/${this.currentProblem.preguntas.length}:** ${pregunta}`);
         
         this.mostrarBotonesRespuesta();
     }
@@ -233,7 +219,7 @@ class CyclopsBotAvanzado {
         const respuestas = [
             { texto: '✅ Sí', valor: 'sí' },
             { texto: '❌ No', valor: 'no' },
-            { texto: '🤔 No estoy seguro', valor: 'no_se' }
+            { texto: '🤔 No sé', valor: 'no_se' }
         ];
 
         respuestas.forEach(respuesta => {
@@ -259,7 +245,7 @@ class CyclopsBotAvanzado {
         const textos = {
             'sí': 'Sí',
             'no': 'No', 
-            'no_se': 'No estoy seguro'
+            'no_se': 'No sé'
         };
         return textos[respuesta] || respuesta;
     }
@@ -307,8 +293,7 @@ class CyclopsBotAvanzado {
         const botonesFinales = [
             { texto: '🔄 Nuevo diagnóstico', action: () => this.nuevoDiagnostico(), type: 'primary' },
             { texto: '⭐ Solución útil', action: () => this.calificarSolucion('util'), type: 'success' },
-            { texto: '👎 No resolvió', action: () => this.calificarSolucion('no_util'), type: 'danger' },
-            { texto: '📊 Ver estadísticas', action: () => this.mostrarEstadisticas(), type: 'secondary' }
+            { texto: '📊 Estadísticas', action: () => this.mostrarEstadisticas(), type: 'secondary' }
         ];
 
         botonesFinales.forEach(boton => {
@@ -320,8 +305,8 @@ class CyclopsBotAvanzado {
     async calificarSolucion(calificacion) {
         this.addMessage('user', `Calificación: ${calificacion === 'util' ? 'Solución útil' : 'No resolvió'}`);
         this.addMessage('bot', calificacion === 'util' ? 
-            '✅ ¡Gracias por tu feedback! Me ayuda a mejorar.' : 
-            '❌ Lamento que no te haya ayudado. ¿Quieres intentar con otro diagnóstico?'
+            '✅ ¡Gracias por tu feedback!' : 
+            '❌ Lamento que no te haya ayudado.'
         );
     }
 
@@ -332,7 +317,7 @@ class CyclopsBotAvanzado {
         this.currentQuestionIndex = 0;
         this.userAnswers = [];
         
-        this.addMessage('bot', '🔄 **Reiniciando sistema de diagnóstico...**');
+        this.addMessage('bot', '🔄 **Reiniciando diagnóstico...**');
         await this.mostrarCategorias();
     }
 
@@ -342,7 +327,7 @@ class CyclopsBotAvanzado {
         this.currentQuestionIndex = 0;
         this.userAnswers = [];
         
-        this.addMessage('bot', '↩️ **Volviendo a categorías principales...**');
+        this.addMessage('bot', '↩️ **Volviendo a categorías...**');
         this.mostrarCategorias();
     }
 
@@ -356,8 +341,10 @@ class CyclopsBotAvanzado {
         container.className = 'botones-container';
         container.style.display = 'flex';
         container.style.flexDirection = 'column';
-        container.style.gap = '10px';
-        container.style.marginTop = '15px';
+        container.style.gap = '8px';
+        container.style.marginTop = '10px';
+        container.style.maxHeight = '150px';
+        container.style.overflowY = 'auto';
         
         const chatMessages = document.getElementById('chatMessages');
         chatMessages.appendChild(container);
@@ -371,13 +358,14 @@ class CyclopsBotAvanzado {
         boton.innerHTML = texto;
         boton.style.width = '100%';
         boton.style.justifyContent = 'flex-start';
-        boton.style.padding = '12px 20px';
+        boton.style.padding = '10px 15px';
+        boton.style.fontSize = '0.8rem';
+        boton.style.marginBottom = '0';
         
         boton.addEventListener('click', onClick);
         return boton;
     }
 
-    // MÉTODOS EXISTENTES (sin cambios)
     async registrarConsulta(consulta, respuesta) {
         try {
             const { error } = await this.supabase
@@ -445,52 +433,34 @@ class CyclopsBotAvanzado {
     addMessage(sender, content) {
         const chatMessages = document.getElementById('chatMessages');
         const messageDiv = document.createElement('div');
-        messageDiv.className = `message ${sender}-message advanced`;
-        
-        const messageHeader = document.createElement('div');
-        messageHeader.className = 'message-header';
-        
-        const avatarDiv = document.createElement('div');
-        avatarDiv.className = 'bot-avatar';
-        avatarDiv.innerHTML = sender === 'bot' ? 
-            '<div class="avatar-core"></div><div class="avatar-ring"></div>' : 
-            '👤';
-        
-        const metaDiv = document.createElement('div');
-        metaDiv.className = 'message-meta';
-        
-        const senderName = document.createElement('span');
-        senderName.className = 'sender-name';
-        senderName.textContent = sender === 'bot' ? 'CYCLOPS_AI' : 'USUARIO';
-        
-        const timeSpan = document.createElement('span');
-        timeSpan.className = 'message-time';
-        timeSpan.textContent = new Date().toLocaleTimeString('es-ES', { 
-            hour: '2-digit', 
-            minute: '2-digit' 
-        });
-        
-        metaDiv.appendChild(senderName);
-        metaDiv.appendChild(timeSpan);
-        messageHeader.appendChild(avatarDiv);
-        messageHeader.appendChild(metaDiv);
+        messageDiv.className = `message ${sender}-message`;
+        messageDiv.style.marginBottom = '10px';
+        messageDiv.style.padding = '8px 12px';
+        messageDiv.style.background = sender === 'bot' ? 'rgba(0, 243, 255, 0.05)' : 'rgba(255, 0, 255, 0.05)';
+        messageDiv.style.borderRadius = '8px';
+        messageDiv.style.border = `1px solid ${sender === 'bot' ? 'rgba(0, 243, 255, 0.2)' : 'rgba(255, 0, 255, 0.2)'}`;
         
         const contentDiv = document.createElement('div');
-        contentDiv.className = 'message-content-advanced';
+        contentDiv.style.fontSize = '0.9rem';
+        contentDiv.style.lineHeight = '1.4';
         
         const paragraphs = content.split('\n');
         paragraphs.forEach(paragraph => {
             if (paragraph.trim() !== '') {
                 const p = document.createElement('p');
-                p.innerHTML = paragraph; // Usar innerHTML para permitir formato
+                p.innerHTML = paragraph;
+                p.style.margin = '4px 0';
                 contentDiv.appendChild(p);
             }
         });
         
-        messageDiv.appendChild(messageHeader);
         messageDiv.appendChild(contentDiv);
         chatMessages.appendChild(messageDiv);
-        chatMessages.scrollTop = chatMessages.scrollHeight;
+        
+        // Scroll automático
+        setTimeout(() => {
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }, 50);
     }
 
     handleQuickAction(action) {
@@ -508,12 +478,11 @@ class CyclopsBotAvanzado {
     }
 
     mostrarAyuda() {
-        this.addMessage('bot', 'ℹ️ **CENTRO DE AYUDA CYCLOPSBOT**');
-        this.addMessage('bot', '• **Selecciona categorías** → Elige el tipo de problema');
-        this.addMessage('bot', '• **Selecciona problema específico** → Identifica tu caso');
-        this.addMessage('bot', '• **Responde preguntas** → Guía el diagnóstico con Sí/No/No sé');
-        this.addMessage('bot', '• **Obtén soluciones** → Instrucciones paso a paso');
-        this.addMessage('bot', '• **Califica resultados** → Ayuda a mejorar el sistema');
+        this.addMessage('bot', 'ℹ️ **AYUDA CYCLOPSBOT**');
+        this.addMessage('bot', '1. **Selecciona categoría**');
+        this.addMessage('bot', '2. **Elige problema específico**');
+        this.addMessage('bot', '3. **Responde preguntas (Sí/No/No sé)**');
+        this.addMessage('bot', '4. **Obtén soluciones**');
     }
 
     resetBot() {
@@ -530,11 +499,10 @@ class CyclopsBotAvanzado {
     }
 
     mostrarEstadisticas() {
-        this.addMessage('bot', '📊 **ESTADÍSTICAS DE LA SESIÓN**');
-        this.addMessage('bot', `• Categoría diagnosticada: ${this.currentCategory || 'Ninguna'}`);
-        this.addMessage('bot', `• Problema analizado: ${this.currentProblem?.descripcion || 'Ninguno'}`);
-        this.addMessage('bot', `• Preguntas realizadas: ${this.currentQuestionIndex}`);
-        this.addMessage('bot', `• Respuestas registradas: ${this.userAnswers.length}`);
+        this.addMessage('bot', '📊 **ESTADÍSTICAS**');
+        this.addMessage('bot', `• Categoría: ${this.currentCategory || 'Ninguna'}`);
+        this.addMessage('bot', `• Problema: ${this.currentProblem?.descripcion || 'Ninguno'}`);
+        this.addMessage('bot', `• Preguntas: ${this.currentQuestionIndex}`);
     }
 }
 
