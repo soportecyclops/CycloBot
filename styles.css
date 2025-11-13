@@ -977,3 +977,114 @@ body {
     from { transform: rotate(0deg); }
     to { transform: rotate(360deg); }
 }
+/* Estilos para mensajes del chat - COMPATIBILIDAD */
+.message {
+    margin-bottom: 20px;
+    animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.bot-message, .user-message {
+    display: flex;
+    gap: 15px;
+    align-items: flex-start;
+}
+
+.user-message {
+    flex-direction: row-reverse;
+}
+
+.message-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.bot-message .message-avatar {
+    background: linear-gradient(45deg, var(--primary), var(--cyber-blue));
+}
+
+.user-message .message-avatar {
+    background: linear-gradient(45deg, var(--secondary), var(--cyber-purple));
+}
+
+.mini-eye {
+    width: 20px;
+    height: 20px;
+    background: var(--darker);
+    border-radius: 50%;
+    position: relative;
+}
+
+.mini-eye::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 8px;
+    height: 8px;
+    background: var(--accent);
+    border-radius: 50%;
+}
+
+.message-content {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 15px;
+    border-radius: 10px;
+    border: 1px solid rgba(0, 243, 255, 0.2);
+}
+
+.bot-message .message-content {
+    background: rgba(0, 243, 255, 0.05);
+    border-color: rgba(0, 243, 255, 0.3);
+}
+
+.user-message .message-content {
+    background: rgba(255, 0, 255, 0.05);
+    border-color: rgba(255, 0, 255, 0.3);
+}
+
+.message-content p {
+    margin: 5px 0;
+    line-height: 1.4;
+}
+
+.message-content p:first-child {
+    margin-top: 0;
+}
+
+.message-content p:last-child {
+    margin-bottom: 0;
+}
+
+/* Botones de acción rápida compatibles */
+.quick-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+    background: linear-gradient(45deg, var(--primary), var(--cyber-blue));
+    color: var(--darker);
+}
+
+.quick-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 243, 255, 0.4);
+}
