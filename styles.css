@@ -1150,3 +1150,125 @@ body {
     background: var(--primary);
     border-radius: 3px;
 }
+/* ESTILOS COMPACTOS MEJORADOS */
+.cyber-header {
+    padding: 12px 20px !important;
+    margin-bottom: 10px !important;
+}
+
+.logo-container {
+    gap: 12px !important;
+    margin-bottom: 8px !important;
+}
+
+.cyber-logo {
+    width: 45px !important;
+    height: 45px !important;
+}
+
+.cyber-title {
+    font-size: 1.6rem !important;
+    margin-bottom: 2px !important;
+}
+
+.subtitle-chip {
+    font-size: 0.75rem !important;
+    padding: 3px 10px !important;
+}
+
+.status-item {
+    padding: 4px 8px !important;
+    font-size: 0.65rem !important;
+}
+
+.cyber-main {
+    gap: 12px !important;
+    margin-bottom: 10px !important;
+}
+
+.cyber-chat-container {
+    min-height: 400px;
+}
+
+.cyber-chat-messages {
+    max-height: 280px !important;
+    min-height: 200px;
+    padding: 12px !important;
+}
+
+.cyber-info-panel {
+    padding: 12px !important;
+}
+
+.capability-item, .stat-card {
+    padding: 6px 10px !important;
+    margin-bottom: 6px !important;
+}
+
+.capability-icon {
+    width: 35px !important;
+    height: 35px !important;
+}
+
+.capability-icon i {
+    font-size: 1rem !important;
+}
+
+.stat-icon {
+    width: 40px !important;
+    height: 40px !important;
+}
+
+.stat-icon i {
+    font-size: 1.1rem !important;
+}
+
+.stat-number {
+    font-size: 1.2rem !important;
+}
+
+.cyber-footer {
+    padding: 12px 20px !important;
+}
+
+/* Mejoras para botones */
+.cyber-btn {
+    padding: 10px 15px !important;
+    font-size: 0.8rem !important;
+    margin: 2px 0 !important;
+}
+
+.quick-actions-advanced {
+    gap: 8px !important;
+    padding: 12px !important;
+}
+
+/* Scroll personalizado mejorado */
+.botones-container::-webkit-scrollbar {
+    width: 4px;
+}
+
+.botones-container::-webkit-scrollbar-track {
+    background: rgba(0, 243, 255, 0.1);
+    border-radius: 2px;
+}
+
+.botones-container::-webkit-scrollbar-thumb {
+    background: var(--primary);
+    border-radius: 2px;
+}
+
+/* Responsive mejorado */
+@media (max-width: 768px) {
+    .container {
+        padding: 8px !important;
+    }
+    
+    .cyber-main {
+        grid-template-columns: 1fr !important;
+    }
+    
+    .cyber-chat-messages {
+        max-height: 250px !important;
+    }
+}
