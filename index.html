@@ -9,67 +9,157 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        /* ESTILOS COMPACTOS ADICIONALES */
+        /* ESTILOS COMPACTOS MEJORADOS */
+        body {
+            overflow: hidden;
+            height: 100vh;
+        }
+        
+        .container {
+            height: 100vh;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+        }
+        
         .cyber-header {
-            padding: 15px 20px !important;
-            margin-bottom: 15px !important;
+            padding: 8px 15px !important;
+            margin-bottom: 8px !important;
+            flex-shrink: 0;
         }
         
         .logo-container {
-            gap: 15px !important;
-            margin-bottom: 10px !important;
+            gap: 10px !important;
+            margin-bottom: 5px !important;
         }
         
         .cyber-logo {
-            width: 50px !important;
-            height: 50px !important;
+            width: 40px !important;
+            height: 40px !important;
         }
         
         .cyber-title {
-            font-size: 1.8rem !important;
+            font-size: 1.4rem !important;
+            margin-bottom: 0 !important;
+        }
+        
+        .subtitle-chip {
+            font-size: 0.7rem !important;
+            padding: 2px 8px !important;
+        }
+        
+        .status-grid {
+            gap: 8px !important;
         }
         
         .status-item {
-            padding: 5px 10px !important;
-            font-size: 0.7rem !important;
+            padding: 3px 6px !important;
+            font-size: 0.6rem !important;
         }
         
         .cyber-main {
-            gap: 15px !important;
-            margin-bottom: 15px !important;
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 10px;
+            flex: 1;
+            min-height: 0;
+            margin-bottom: 8px;
+        }
+        
+        .cyber-chat-container {
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+        
+        .chat-header-advanced {
+            padding: 8px 12px !important;
+            flex-shrink: 0;
         }
         
         .cyber-chat-messages {
-            max-height: 300px !important;
-            padding: 15px !important;
+            flex: 1;
+            max-height: none !important;
+            padding: 10px !important;
+            overflow-y: auto;
+            min-height: 0;
+        }
+        
+        .cyber-chat-input {
+            padding: 8px 12px !important;
+            flex-shrink: 0;
+            border-top: 1px solid var(--terminal-border);
+        }
+        
+        .quick-actions-advanced {
+            gap: 6px !important;
+        }
+        
+        .cyber-btn {
+            padding: 8px 12px !important;
+            font-size: 0.75rem !important;
         }
         
         .cyber-info-panel {
-            padding: 15px !important;
+            padding: 10px !important;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
         }
         
-        .capability-item, .stat-card {
-            padding: 8px 12px !important;
-            margin-bottom: 8px !important;
+        .panel-header {
+            margin-bottom: 10px !important;
+            padding-bottom: 8px !important;
+            flex-shrink: 0;
+        }
+        
+        .stats-advanced, .capabilities-grid {
+            flex-shrink: 0;
         }
         
         .cyber-footer {
-            padding: 15px 20px !important;
+            padding: 8px 15px !important;
+            flex-shrink: 0;
+        }
+        
+        .footer-bottom {
+            padding-top: 8px !important;
+        }
+        
+        /* Mensajes compactos */
+        .message {
+            margin-bottom: 6px !important;
+            padding: 6px 10px !important;
+        }
+        
+        .message-content-advanced p {
+            margin: 2px 0 !important;
+            font-size: 0.85rem;
+        }
+        
+        /* Botones compactos */
+        .botones-container {
+            max-height: 120px !important;
+            gap: 4px !important;
+            margin-top: 6px !important;
+        }
+        
+        .boton-categoria {
+            padding: 8px 10px !important;
+            font-size: 0.8rem !important;
+            text-align: left;
         }
     </style>
 </head>
 <body>
     <!-- Fondo con partículas -->
     <div class="particles-background"></div>
-    
-    <!-- Efectos de neón -->
     <div class="neon-glow"></div>
     <div class="circuit-lines"></div>
 
     <div class="container">
-        <!-- Header Compacto -->
+        <!-- Header Super Compacto -->
         <header class="cyber-header">
-            <div class="header-glow"></div>
             <div class="logo-container">
                 <div class="cyber-logo">
                     <div class="hologram-effect">
@@ -86,11 +176,9 @@
                     </div>
                 </div>
                 <div class="title-container">
-                    <h1 class="cyber-title">
-                        <span class="title-glitch" data-text="CYCLOPSBOT">CYCLOPSBOT</span>
-                    </h1>
+                    <h1 class="cyber-title">CYCLOPSBOT</h1>
                     <div class="subtitle-grid">
-                        <span class="subtitle-chip">SISTEMA DE DIAGNÓSTICO IA</span>
+                        <span class="subtitle-chip">DIAGNÓSTICO TÉCNICO</span>
                         <span class="version-badge">v2.1.0</span>
                     </div>
                 </div>
@@ -100,12 +188,12 @@
                 <div class="status-grid">
                     <div class="status-item online">
                         <i class="fas fa-server"></i>
-                        <span>BASE DATOS</span>
+                        <span>BD</span>
                         <div class="status-indicator active"></div>
                     </div>
                     <div class="status-item online">
                         <i class="fas fa-brain"></i>
-                        <span>IA ACTIVA</span>
+                        <span>IA</span>
                         <div class="status-indicator active"></div>
                     </div>
                     <div class="status-item online">
@@ -118,7 +206,7 @@
         </header>
 
         <main class="cyber-main">
-            <!-- Panel de Chat Compacto -->
+            <!-- Chat Principal - Ocupa todo el espacio -->
             <div class="cyber-chat-container">
                 <div class="chat-header-advanced">
                     <div class="header-terminal">
@@ -134,18 +222,18 @@
                     </div>
                 </div>
                 
-                <!-- Mensajes del Chat -->
+                <!-- Área de Mensajes - Flexible -->
                 <div class="cyber-chat-messages" id="chatMessages">
-                    <div class="message bot-message">
+                    <div class="message bot-message advanced">
                         <div class="message-content-advanced">
-                            <p>> <span class="ready-text">CYCLOPSBOT INICIADO</span></p>
-                            <p>> Sistema de diagnóstico por botones activo</p>
-                            <p>> Base de datos Supabase conectada</p>
+                            <p>> <span class="ready-text">SISTEMA INICIADO</span></p>
+                            <p>> Motor de diagnóstico activo</p>
+                            <p>> Base de datos conectada</p>
                         </div>
                     </div>
                 </div>
                 
-                <!-- Botones de Acción -->
+                <!-- Botones de Acción - Fijos abajo -->
                 <div class="cyber-chat-input">
                     <div class="quick-actions-advanced">
                         <button class="cyber-btn primary" data-action="start">
@@ -164,11 +252,11 @@
                 </div>
             </div>
             
-            <!-- Panel de Información Compacto -->
+            <!-- Panel Lateral Compacto -->
             <div class="cyber-info-panel">
                 <div class="panel-header">
                     <i class="fas fa-chart-network"></i>
-                    <span>PANEL DE CONTROL</span>
+                    <span>PANEL</span>
                 </div>
                 
                 <div class="stats-advanced">
@@ -196,7 +284,7 @@
                 </div>
                 
                 <div class="capabilities-grid">
-                    <h3 class="section-title">CAPACIDADES</h3>
+                    <h3 class="section-title">CATEGORÍAS</h3>
                     <div class="capability-item">
                         <div class="capability-icon">
                             <i class="fas fa-wifi"></i>
@@ -233,14 +321,14 @@
             </div>
         </main>
         
-        <!-- Footer Compacto -->
+        <!-- Footer Super Compacto -->
         <footer class="cyber-footer">
             <div class="footer-bottom">
-                <div class="copyright">
-                    © 2024 CyclopsBot - Sistema de Diagnóstico Técnico
+                <div class="copyright" style="font-size: 0.7rem;">
+                    © 2024 CyclopsBot - Diagnóstico Técnico
                 </div>
-                <div class="build-info">
-                    <span>v2.1.0 | Supabase | PostgreSQL</span>
+                <div class="build-info" style="font-size: 0.65rem;">
+                    v2.1.0 | Supabase | PostgreSQL
                 </div>
             </div>
         </footer>
@@ -251,25 +339,22 @@
     
     <!-- Script para efectos visuales -->
     <script>
-        // Efectos de partículas
+        // Efectos de partículas reducidos
         function createParticles() {
             const particlesContainer = document.querySelector('.particles-background');
             if (!particlesContainer) return;
             
-            for (let i = 0; i < 30; i++) {
+            for (let i = 0; i < 20; i++) {
                 const particle = document.createElement('div');
                 particle.className = 'particle';
                 particle.style.left = Math.random() * 100 + 'vw';
-                particle.style.animationDelay = Math.random() * 20 + 's';
-                particle.style.animationDuration = (Math.random() * 10 + 10) + 's';
+                particle.style.animationDelay = Math.random() * 15 + 's';
+                particle.style.animationDuration = (Math.random() * 8 + 8) + 's';
                 particlesContainer.appendChild(particle);
             }
         }
         
-        // Inicializar efectos
-        document.addEventListener('DOMContentLoaded', function() {
-            createParticles();
-        });
+        document.addEventListener('DOMContentLoaded', createParticles);
     </script>
 </body>
 </html>
