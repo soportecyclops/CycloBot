@@ -180,54 +180,70 @@ class CyclopsBotAvanzado {
     }
 
     async seleccionarProblema(respuestaUsuario) {
-        try {
-            const numero = parseInt(respuestaUsuario);
-            
-            if (isNaN(numero)) {
-                // Búsqueda por texto
-                const { data: problemas, error } = await this.supabase
-                    .from('problemas')
-                    .select('id, identificador, descripcion, preguntas')
-                    .eq('categoria', this.currentCategory)
-                    .eq('activo', true)
-                    .ilike('descripcion', `%${respuestaUsuario}%`);
+    try {
+        console.log('🔍 DEBUG: Buscando problema para:', respuestaUsuario, 'en categoría:', this.currentCategory);
+        
+        const numero = parseInt(respuestaUsuario);
+        
+        if (isNaN(numero)) {
+            // Búsqueda por texto - VERSIÓN MEJORADA
+            const { data: problemas, error } = await this.supabase
+                .from('problemas')
+                .select('id, identificador, descripcion, preguntas')
+                .eq('categoria', this.currentCategory)
+                .eq('activo', true)
+                .or(`descripcion.ilike.%${respuestaUsuario}%,identificador.ilike.%${respuestaUsuario}%`);
 
-                if (error) throw error;
-
-                if (problemas.length === 1) {
-                    this.currentProblem = problemas[0];
-                    this.currentQuestionIndex = 0;
-                    await this.hacerSiguientePregunta();
-                } else {
-                    this.addMessage('bot', 'No encontré un problema específico. ¿Podrías seleccionar por número o describirlo mejor?');
-                    await this.presentarProblemasCategoria(this.currentCategory);
-                }
-            } else {
-                // Selección por número
-                const { data: problemas, error } = await this.supabase
-                    .from('problemas')
-                    .select('id, identificador, descripcion, preguntas')
-                    .eq('categoria', this.currentCategory)
-                    .eq('activo', true)
-                    .order('prioridad', { ascending: false });
-
-                if (error) throw error;
-
-                if (numero > 0 && numero <= problemas.length) {
-                    this.currentProblem = problemas[numero - 1];
-                    this.currentQuestionIndex = 0;
-                    await this.hacerSiguientePregunta();
-                } else {
-                    this.addMessage('bot', 'Número inválido. Por favor selecciona un número de la lista.');
-                    await this.presentarProblemasCategoria(this.currentCategory);
-                }
+            if (error) {
+                console.error('❌ Error en consulta Supabase:', error);
+                throw error;
             }
 
-        } catch (error) {
-            console.error('Error seleccionando problema:', error);
-            this.addMessage('bot', 'Error al procesar tu selección. Intenta nuevamente.');
+            console.log('📊 Problemas encontrados:', problemas);
+
+            if (problemas && problemas.length > 0) {
+                // Usar el primer resultado encontrado
+                this.currentProblem = problemas[0];
+                this.currentQuestionIndex = 0;
+                console.log('✅ Problema seleccionado:', this.currentProblem);
+                await this.hacerSiguientePregunta();
+            } else {
+                console.log('❌ No se encontraron problemas');
+                this.addMessage('bot', 'No encontré un problema específico con esa descripción. ¿Podrías intentar con otras palabras?');
+                await this.presentarProblemasCategoria(this.currentCategory);
+            }
+        } else {
+            // Selección por número - VERSIÓN MEJORADA
+            const { data: problemas, error } = await this.supabase
+                .from('problemas')
+                .select('id, identificador, descripcion, preguntas')
+                .eq('categoria', this.currentCategory)
+                .eq('activo', true)
+                .order('prioridad', { ascending: false });
+
+            if (error) {
+                console.error('❌ Error en consulta Supabase:', error);
+                throw error;
+            }
+
+            console.log('📊 Problemas disponibles:', problemas);
+
+            if (numero > 0 && numero <= problemas.length) {
+                this.currentProblem = problemas[numero - 1];
+                this.currentQuestionIndex = 0;
+                console.log('✅ Problema seleccionado por número:', this.currentProblem);
+                await this.hacerSiguientePregunta();
+            } else {
+                this.addMessage('bot', 'Número inválido. Por favor selecciona un número de la lista.');
+                await this.presentarProblemasCategoria(this.currentCategory);
+            }
         }
+
+    } catch (error) {
+        console.error('💥 Error en seleccionarProblema:', error);
+        this.addMessage('bot', 'Error al conectar con la base de datos. Intenta nuevamente.');
     }
+}
 
     async hacerSiguientePregunta() {
         if (!this.currentProblem.preguntas || this.currentProblem.preguntas.length === 0) {
