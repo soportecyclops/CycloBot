@@ -1,4 +1,4 @@
-// script.js - CYCLOPSBOT CON SUPABASE - VERSIÓN CORREGIDA
+// script.js - CYCLOPSBOT CORREGIDO PARA TU ESTRUCTURA ACTUAL
 class CyclopsBotAvanzado {
     constructor() {
         // CREDENCIALES CORRECTAS
@@ -21,6 +21,9 @@ class CyclopsBotAvanzado {
             this.supabase = supabase.createClient(this.supabaseUrl, this.supabaseKey);
             console.log('✅ Supabase inicializado correctamente');
             
+            // Test de conexión
+            await this.testConnection();
+            
             // Configurar event listeners
             this.setupEventListeners();
             
@@ -35,6 +38,38 @@ class CyclopsBotAvanzado {
         } catch (error) {
             console.error('❌ Error inicializando bot:', error);
             this.addMessage('bot', '⚠️ Error de conexión. Verificando configuración...');
+        }
+    }
+
+    async testConnection() {
+        try {
+            console.log('🔍 Probando conexión y datos...');
+            
+            // Verificar problemas existentes (sin filtrar por 'activo')
+            const { data: problemas, error } = await this.supabase
+                .from('problemas')
+                .select('id, categoria, identificador, descripcion')
+                .limit(5);
+
+            if (error) {
+                console.error('❌ Error en consulta:', error);
+                return;
+            }
+
+            console.log('📊 Problemas encontrados en BD:', problemas);
+            
+            if (problemas && problemas.length > 0) {
+                console.log('✅ Datos cargados correctamente');
+                problemas.forEach(p => {
+                    console.log(`   - ${p.categoria}: ${p.descripcion}`);
+                });
+            } else {
+                console.log('❌ No hay problemas en la base de datos');
+                this.addMessage('bot', '⚠️ La base de datos está vacía. Contacta al administrador.');
+            }
+
+        } catch (error) {
+            console.error('💥 Error en testConnection:', error);
         }
     }
 
@@ -78,20 +113,23 @@ class CyclopsBotAvanzado {
         // Mostrar indicador de typing
         this.showTypingIndicator();
 
-        if (!this.diagnosisActive) {
-            await this.startDiagnosis(message);
-        } else {
-            await this.processAnswer(message);
-        }
-
-        // Ocultar indicador de typing
-        this.hideTypingIndicator();
+        // Pequeño delay para mejor UX
+        setTimeout(async () => {
+            if (!this.diagnosisActive) {
+                await this.startDiagnosis(message);
+            } else {
+                await this.processAnswer(message);
+            }
+            this.hideTypingIndicator();
+        }, 1000);
     }
 
     async startDiagnosis(userMessage) {
         this.diagnosisActive = true;
         
         try {
+            console.log('🔍 Iniciando diagnóstico para:', userMessage);
+            
             // Buscar categoría basada en el mensaje del usuario
             const categoria = await this.predecirCategoria(userMessage);
             
@@ -116,18 +154,17 @@ class CyclopsBotAvanzado {
         try {
             console.log('🔍 Buscando categoría para:', texto);
             
-            // Buscar en todas las categorías y problemas
+            // Buscar en todos los problemas (sin filtro de activo)
             const { data: problemas, error } = await this.supabase
                 .from('problemas')
-                .select('categoria, keywords, descripcion, identificador')
-                .eq('activo', true);
+                .select('categoria, keywords, descripcion, identificador');
 
             if (error) {
                 console.error('Error en consulta:', error);
                 throw error;
             }
 
-            console.log('📊 Problemas encontrados en BD:', problemas);
+            console.log('📊 Total de problemas encontrados:', problemas.length);
 
             const textoLower = texto.toLowerCase();
             let mejorCategoria = null;
@@ -137,11 +174,11 @@ class CyclopsBotAvanzado {
             problemas.forEach(problema => {
                 let puntaje = 0;
                 
-                // Buscar en keywords
+                // Buscar en keywords (si existe el campo)
                 if (problema.keywords && Array.isArray(problema.keywords)) {
                     problema.keywords.forEach(keyword => {
                         if (textoLower.includes(keyword.toLowerCase())) {
-                            puntaje += 3; // Más peso a keywords
+                            puntaje += 3;
                         }
                     });
                 }
@@ -158,7 +195,19 @@ class CyclopsBotAvanzado {
                 
                 // Buscar en nombre de categoría
                 if (textoLower.includes(problema.categoria.toLowerCase())) {
-                    puntaje += 4; // Máximo peso para categoría directa
+                    puntaje += 4;
+                }
+
+                // Búsqueda general en todos los campos de texto
+                const textoCompleto = [
+                    problema.categoria,
+                    problema.identificador, 
+                    problema.descripcion,
+                    ...(problema.keywords || [])
+                ].join(' ').toLowerCase();
+
+                if (textoCompleto.includes(textoLower)) {
+                    puntaje += 1;
                 }
 
                 if (puntaje > mejorPuntaje) {
@@ -168,7 +217,7 @@ class CyclopsBotAvanzado {
             });
 
             console.log(`🏆 Categoría seleccionada: ${mejorCategoria} con puntaje: ${mejorPuntaje}`);
-            return mejorPuntaje >= 2 ? mejorCategoria : null;
+            return mejorPuntaje >= 1 ? mejorCategoria : null;
 
         } catch (error) {
             console.error('❌ Error prediciendo categoría:', error);
@@ -180,12 +229,11 @@ class CyclopsBotAvanzado {
         try {
             console.log(`📂 Cargando problemas para categoría: ${categoria}`);
             
+            // Buscar problemas de esta categoría (sin filtro de activo)
             const { data: problemas, error } = await this.supabase
                 .from('problemas')
-                .select('id, identificador, descripcion, prioridad')
-                .eq('categoria', categoria)
-                .eq('activo', true)
-                .order('prioridad', { ascending: false });
+                .select('id, identificador, descripcion')
+                .eq('categoria', categoria);
 
             if (error) {
                 console.error('❌ Error cargando problemas:', error);
@@ -205,7 +253,7 @@ class CyclopsBotAvanzado {
                 mensaje += `${index + 1}. ${problema.descripcion}\n`;
             });
             
-            mensaje += '\n**¿Cuál de estos se parece más a tu problema?** (Responde con el número o describe tu problema)';
+            mensaje += '\n**¿Cuál de estos se parece más a tu problema?** (Responde con el número)';
             this.addMessage('bot', mensaje);
 
         } catch (error) {
@@ -251,7 +299,6 @@ class CyclopsBotAvanzado {
                 .from('problemas')
                 .select('id, identificador, descripcion, preguntas, categoria')
                 .eq('categoria', this.currentCategory)
-                .eq('activo', true)
                 .or(`descripcion.ilike.%${textoBusqueda}%,identificador.ilike.%${textoBusqueda}%`);
 
             if (error) throw error;
@@ -259,17 +306,12 @@ class CyclopsBotAvanzado {
             console.log('📊 Resultados búsqueda:', problemas);
 
             if (problemas && problemas.length > 0) {
-                // Usar el primer resultado más relevante
                 this.currentProblem = problemas[0];
                 this.currentQuestionIndex = 0;
                 console.log('✅ Problema seleccionado:', this.currentProblem.descripcion);
                 await this.hacerSiguientePregunta();
             } else {
                 this.addMessage('bot', '❌ No encontré un problema específico con esa descripción.');
-                this.addMessage('bot', '💡 **Sugerencias:**');
-                this.addMessage('bot', '- Intenta con palabras más generales');
-                this.addMessage('bot', '- Usa los números de la lista anterior');
-                this.addMessage('bot', '- Describe el síntoma principal');
                 await this.presentarProblemasCategoria(this.currentCategory);
             }
 
@@ -284,9 +326,7 @@ class CyclopsBotAvanzado {
             const { data: problemas, error } = await this.supabase
                 .from('problemas')
                 .select('id, identificador, descripcion, preguntas')
-                .eq('categoria', this.currentCategory)
-                .eq('activo', true)
-                .order('prioridad', { ascending: false });
+                .eq('categoria', this.currentCategory);
 
             if (error) throw error;
 
@@ -346,14 +386,7 @@ class CyclopsBotAvanzado {
                 });
             } else {
                 this.addMessage('bot', '⚠️ No hay soluciones específicas registradas para este problema.');
-                this.addMessage('bot', '💡 Te recomiendo contactar con soporte técnico especializado.');
             }
-
-            // Registrar la consulta
-            await this.registrarConsulta(
-                `Problema: ${this.currentCategory} - ${problema.descripcion}`,
-                problema.soluciones ? problema.soluciones.join(' | ') : 'Sin soluciones específicas'
-            );
 
             this.addMessage('bot', '---');
             this.addMessage('bot', '¿Te fue útil esta solución? Escribe "reiniciar" para comenzar un nuevo diagnóstico.');
@@ -367,51 +400,19 @@ class CyclopsBotAvanzado {
         }
     }
 
-    async registrarConsulta(consulta, respuesta) {
-        try {
-            const { error } = await this.supabase
-                .from('consultas_usuarios')
-                .insert({
-                    session_id: this.sessionId,
-                    pregunta_usuario: consulta,
-                    respuesta_bot: respuesta,
-                    categoria_detectada: this.currentCategory,
-                    problema_id: this.currentProblem.id,
-                    preguntas_realizadas: this.currentQuestionIndex,
-                    creado_en: new Date().toISOString()
-                });
-
-            if (error) throw error;
-            console.log('✅ Consulta registrada correctamente');
-
-        } catch (error) {
-            console.error('❌ Error registrando consulta:', error);
-        }
-    }
-
     async updateStats() {
         try {
             const problemsCount = document.getElementById('problemsCount');
             const diagnosticsCount = document.getElementById('diagnosticsCount');
 
-            // Contar problemas activos
+            // Contar problemas (sin filtro de activo)
             const { data: problemas, error } = await this.supabase
                 .from('problemas')
-                .select('id', { count: 'exact' })
-                .eq('activo', true);
+                .select('id', { count: 'exact' });
 
             if (!error && problemas) {
                 problemsCount.textContent = problemas.length;
-            }
-
-            // Contar consultas en esta sesión
-            const { data: consultas, error: errorConsultas } = await this.supabase
-                .from('consultas_usuarios')
-                .select('id', { count: 'exact' })
-                .eq('session_id', this.sessionId);
-
-            if (!errorConsultas && consultas) {
-                diagnosticsCount.textContent = consultas.length;
+                console.log('📊 Estadísticas actualizadas:', problemas.length, 'problemas');
             }
 
         } catch (error) {
@@ -419,7 +420,7 @@ class CyclopsBotAvanzado {
         }
     }
 
-    // MÉTODOS DE INTERFAZ
+    // MÉTODOS DE INTERFAZ (sin cambios)
     addMessage(sender, content) {
         const chatMessages = document.getElementById('chatMessages');
         const messageDiv = document.createElement('div');
@@ -437,16 +438,12 @@ class CyclopsBotAvanzado {
         const contentDiv = document.createElement('div');
         contentDiv.className = 'message-content';
         
-        // Procesar contenido con formato básico
         const lines = content.split('\n');
         lines.forEach(line => {
             if (line.trim() !== '') {
                 const p = document.createElement('p');
-                
-                // Formato básico para negritas
                 let formattedLine = line.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
                 p.innerHTML = formattedLine;
-                
                 contentDiv.appendChild(p);
             }
         });
@@ -454,8 +451,6 @@ class CyclopsBotAvanzado {
         messageDiv.appendChild(avatarDiv);
         messageDiv.appendChild(contentDiv);
         chatMessages.appendChild(messageDiv);
-        
-        // Scroll al final
         chatMessages.scrollTop = chatMessages.scrollHeight;
     }
 
@@ -489,11 +484,9 @@ class CyclopsBotAvanzado {
                 this.addMessage('bot', '🚀 **Iniciando diagnóstico...** Por favor, describe tu problema técnico:');
                 this.diagnosisActive = true;
                 break;
-                
             case 'reset':
                 this.resetBot();
                 break;
-                
             case 'help':
                 this.mostrarAyuda();
                 break;
@@ -502,12 +495,7 @@ class CyclopsBotAvanzado {
 
     mostrarAyuda() {
         this.addMessage('bot', '🆘 **Centro de Ayuda - CyclopsBot**');
-        this.addMessage('bot', '**Cómo usar el sistema:**');
-        this.addMessage('bot', '1. Describe tu problema técnico');
-        this.addMessage('bot', '2. Responde las preguntas del diagnóstico');
-        this.addMessage('bot', '3. Sigue las soluciones recomendadas');
-        this.addMessage('bot', '4. Escribe "reiniciar" en cualquier momento para comenzar de nuevo');
-        this.addMessage('bot', '**Ejemplos:** "Mi WiFi no funciona", "La computadora no enciende", "El teléfono no carga"...');
+        this.addMessage('bot', '**Cómo usar:** Describe tu problema y responde las preguntas.');
     }
 
     resetBot() {
@@ -528,15 +516,13 @@ class CyclopsBotAvanzado {
             'internet': 'Internet y Redes',
             'hardware': 'Hardware',
             'software': 'Software',
-            'movil': 'Dispositivos Móviles',
-            'redes': 'Redes y Conectividad',
-            'sistema': 'Sistema Operativo'
+            'movil': 'Dispositivos Móviles'
         };
         return displayNames[category] || category;
     }
 }
 
-// Inicializar el bot cuando el DOM esté listo
+// Inicializar el bot
 document.addEventListener('DOMContentLoaded', () => {
     console.log('🚀 Inicializando CyclopsBot...');
     window.cyclopsBot = new CyclopsBotAvanzado();
