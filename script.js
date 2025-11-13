@@ -1,34 +1,49 @@
-class CyclopsBot {
+// script.js - CYCLOPSBOT CON SUPABASE
+class CyclopsBotAvanzado {
     constructor() {
-        this.knowledgeBase = null;
+        this.supabaseUrl = 'https://mapvbc.fbr.tkcf.psyj.xtl_supabase.co';
+        this.supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5tcHZiY2Zicmh0Y2Z5b3ZqenVsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMwMjQ0NjAsImV4cCI6MjA3ODYwMDQ2MH0.9-FalpRfqQmD_72ZDbVnBbN7EU7lwgzsX2zNWz8er_4';
+        
+        this.supabase = null;
         this.currentCategory = null;
         this.currentProblem = null;
         this.currentQuestionIndex = 0;
         this.diagnosisActive = false;
-        this.diagnosticsCount = 0;
+        this.sessionId = this.generateSessionId();
         
         this.initializeBot();
-        this.loadKnowledgeBase();
         this.setupEventListeners();
-        this.updateStats();
     }
 
-    async loadKnowledgeBase() {
-        try {
-            const response = await fetch('knowledge_base.json');
-            this.knowledgeBase = await response.json();
-            this.updateStats();
-            console.log('Base de conocimiento cargada:', this.knowledgeBase);
-        } catch (error) {
-            console.error('Error cargando la base de conocimiento:', error);
-            this.addMessage('bot', 'Error al cargar la base de conocimiento. Por favor, recarga la página.');
+    async initializeSupabase() {
+        // Cargar Supabase desde CDN dinámicamente
+        if (typeof supabase === 'undefined') {
+            await this.loadSupabaseSDK();
         }
+        this.supabase = supabase.createClient(this.supabaseUrl, this.supabaseKey);
+        console.log('Supabase inicializado');
     }
 
-    initializeBot() {
-        this.addMessage('bot', '¡Hola! Soy CyclopsBot, tu asistente técnico personal.');
-        this.addMessage('bot', 'Voy a hacerte algunas preguntas para diagnosticar tu problema. Piensa en el problema que tienes y yo intentaré adivinarlo.');
-        this.addMessage('bot', '¿Estás listo para comenzar?');
+    loadSupabaseSDK() {
+        return new Promise((resolve, reject) => {
+            const script = document.createElement('script');
+            script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
+            script.onload = resolve;
+            script.onerror = reject;
+            document.head.appendChild(script);
+        });
+    }
+
+    generateSessionId() {
+        return 'session_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
+    }
+
+    async initializeBot() {
+        await this.initializeSupabase();
+        this.addMessage('bot', '¡Hola! Soy CyclopsBot, tu asistente técnico inteligente.');
+        this.addMessage('bot', 'Ahora con base de datos en la nube y aprendizaje automático.');
+        this.addMessage('bot', '¿Estás listo para diagnosticar tu problema técnico?');
+        this.updateStats();
     }
 
     setupEventListeners() {
@@ -36,19 +51,12 @@ class CyclopsBot {
         const sendButton = document.getElementById('sendButton');
         const quickButtons = document.querySelectorAll('.quick-btn');
 
-        // Enviar mensaje con Enter
         userInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                this.handleUserInput();
-            }
+            if (e.key === 'Enter') this.handleUserInput();
         });
 
-        // Enviar mensaje con botón
-        sendButton.addEventListener('click', () => {
-            this.handleUserInput();
-        });
+        sendButton.addEventListener('click', () => this.handleUserInput());
 
-        // Botones rápidos
         quickButtons.forEach(button => {
             button.addEventListener('click', (e) => {
                 const action = e.target.dataset.action;
@@ -57,7 +65,7 @@ class CyclopsBot {
         });
     }
 
-    handleUserInput() {
+    async handleUserInput() {
         const userInput = document.getElementById('userInput');
         const message = userInput.value.trim();
 
@@ -67,178 +75,281 @@ class CyclopsBot {
         userInput.value = '';
 
         if (!this.diagnosisActive) {
-            this.startDiagnosis();
+            this.startDiagnosis(message);
         } else {
             this.processAnswer(message);
         }
     }
 
-    handleQuickAction(action) {
-        switch (action) {
-            case 'start':
-                this.startDiagnosis();
-                break;
-            case 'reset':
-                this.resetBot();
-                break;
-        }
-    }
-
-    startDiagnosis() {
+    async startDiagnosis(userMessage) {
         this.diagnosisActive = true;
-        this.currentCategory = null;
-        this.currentProblem = null;
-        this.currentQuestionIndex = 0;
         
-        this.addMessage('bot', 'Perfecto. Comencemos con el diagnóstico.');
-        this.addMessage('bot', 'Por favor, describe brevemente el problema que estás experimentando:');
-    }
-
-    processAnswer(answer) {
-        if (!this.currentCategory) {
-            // Primera respuesta: identificar categoría
-            this.identifyCategory(answer);
-        } else if (!this.currentProblem) {
-            // Segunda respuesta: identificar problema específico
-            this.identifyProblem(answer);
+        // Buscar en la base de datos
+        const categoria = await this.predecirCategoria(userMessage);
+        
+        if (categoria) {
+            this.currentCategory = categoria;
+            this.addMessage('bot', `Veo que tienes un problema de ${this.getCategoryDisplayName(categoria)}.`);
+            await this.presentarProblemasCategoria(categoria);
         } else {
-            // Respuestas a preguntas específicas del problema
-            this.processProblemAnswer(answer);
+            this.addMessage('bot', 'No logro identificar la categoría. ¿Podrías ser más específico? Por ejemplo: "problema de WiFi", "falla en hardware", etc.');
         }
     }
 
-    identifyCategory(userInput) {
-        const input = userInput.toLowerCase();
-        let matchedCategory = null;
-        let bestMatchScore = 0;
+    async predecirCategoria(texto) {
+        try {
+            // Buscar coincidencias en la base de datos
+            const { data: problemas, error } = await this.supabase
+                .from('problemas')
+                .select('categoria, keywords')
+                .eq('activo', true);
 
-        // Buscar coincidencias en categorías
-        for (const category in this.knowledgeBase) {
-            const categoryKeywords = this.getCategoryKeywords(category);
-            let score = 0;
+            if (error) throw error;
 
-            categoryKeywords.forEach(keyword => {
-                if (input.includes(keyword)) {
-                    score += 1;
+            const textoLower = texto.toLowerCase();
+            let mejorCategoria = null;
+            let mejorPuntaje = 0;
+
+            problemas.forEach(problema => {
+                let puntaje = 0;
+                
+                // Buscar en keywords
+                if (problema.keywords) {
+                    problema.keywords.forEach(keyword => {
+                        if (textoLower.includes(keyword.toLowerCase())) {
+                            puntaje += 2;
+                        }
+                    });
+                }
+                
+                // Buscar en nombre de categoría
+                if (textoLower.includes(problema.categoria.toLowerCase())) {
+                    puntaje += 3;
+                }
+
+                if (puntaje > mejorPuntaje) {
+                    mejorPuntaje = puntaje;
+                    mejorCategoria = problema.categoria;
                 }
             });
 
-            if (score > bestMatchScore) {
-                bestMatchScore = score;
-                matchedCategory = category;
-            }
-        }
+            return mejorPuntaje > 2 ? mejorCategoria : null;
 
-        if (matchedCategory) {
-            this.currentCategory = matchedCategory;
-            this.addMessage('bot', `Entiendo. Parece ser un problema relacionado con ${this.getCategoryDisplayName(matchedCategory)}.`);
-            this.presentProblems(matchedCategory);
-        } else {
-            this.addMessage('bot', 'No estoy seguro de entender el tipo de problema. ¿Podrías ser más específico? Por ejemplo: "problema de WiFi", "falla en el hardware", etc.');
+        } catch (error) {
+            console.error('Error prediciendo categoría:', error);
+            return null;
         }
     }
 
-    identifyProblem(userInput) {
-        const input = userInput.toLowerCase();
-        const problems = this.knowledgeBase[this.currentCategory];
-        let matchedProblem = null;
-        let bestMatchScore = 0;
+    async presentarProblemasCategoria(categoria) {
+        try {
+            const { data: problemas, error } = await this.supabase
+                .from('problemas')
+                .select('id, identificador, descripcion')
+                .eq('categoria', categoria)
+                .eq('activo', true)
+                .order('prioridad', { ascending: false });
 
-        for (const problemKey in problems) {
-            const problem = problems[problemKey];
-            let score = 0;
+            if (error) throw error;
 
-            // Buscar en las preguntas y soluciones
-            problem.preguntas.forEach(pregunta => {
-                if (this.containsKeywords(input, pregunta)) {
-                    score += 1;
+            if (problemas.length === 0) {
+                this.addMessage('bot', 'No encontré problemas en esta categoría.');
+                return;
+            }
+
+            let mensaje = `Problemas comunes de ${this.getCategoryDisplayName(categoria)}:\n\n`;
+            problemas.forEach((problema, index) => {
+                mensaje += `${index + 1}. ${problema.descripcion}\n`;
+            });
+            
+            mensaje += '\n¿Cuál de estos se parece más a tu problema? (Responde con el número)';
+            this.addMessage('bot', mensaje);
+
+        } catch (error) {
+            console.error('Error cargando problemas:', error);
+            this.addMessage('bot', 'Error al cargar los problemas. Intenta nuevamente.');
+        }
+    }
+
+    async processAnswer(answer) {
+        if (!this.currentProblem) {
+            await this.seleccionarProblema(answer);
+        } else {
+            await this.procesarRespuestaProblema(answer);
+        }
+    }
+
+    async seleccionarProblema(respuestaUsuario) {
+        try {
+            const numero = parseInt(respuestaUsuario);
+            
+            if (isNaN(numero)) {
+                // Búsqueda por texto
+                const { data: problemas, error } = await this.supabase
+                    .from('problemas')
+                    .select('id, identificador, descripcion, preguntas')
+                    .eq('categoria', this.currentCategory)
+                    .eq('activo', true)
+                    .ilike('descripcion', `%${respuestaUsuario}%`);
+
+                if (error) throw error;
+
+                if (problemas.length === 1) {
+                    this.currentProblem = problemas[0];
+                    this.currentQuestionIndex = 0;
+                    await this.hacerSiguientePregunta();
+                } else {
+                    this.addMessage('bot', 'No encontré un problema específico. ¿Podrías seleccionar por número o describirlo mejor?');
+                    await this.presentarProblemasCategoria(this.currentCategory);
                 }
+            } else {
+                // Selección por número
+                const { data: problemas, error } = await this.supabase
+                    .from('problemas')
+                    .select('id, identificador, descripcion, preguntas')
+                    .eq('categoria', this.currentCategory)
+                    .eq('activo', true)
+                    .order('prioridad', { ascending: false });
+
+                if (error) throw error;
+
+                if (numero > 0 && numero <= problemas.length) {
+                    this.currentProblem = problemas[numero - 1];
+                    this.currentQuestionIndex = 0;
+                    await this.hacerSiguientePregunta();
+                } else {
+                    this.addMessage('bot', 'Número inválido. Por favor selecciona un número de la lista.');
+                    await this.presentarProblemasCategoria(this.currentCategory);
+                }
+            }
+
+        } catch (error) {
+            console.error('Error seleccionando problema:', error);
+            this.addMessage('bot', 'Error al procesar tu selección. Intenta nuevamente.');
+        }
+    }
+
+    async hacerSiguientePregunta() {
+        if (!this.currentProblem.preguntas || this.currentProblem.preguntas.length === 0) {
+            await this.mostrarSoluciones();
+            return;
+        }
+
+        if (this.currentQuestionIndex < this.currentProblem.preguntas.length) {
+            const pregunta = this.currentProblem.preguntas[this.currentQuestionIndex];
+            this.addMessage('bot', pregunta);
+        } else {
+            await this.mostrarSoluciones();
+        }
+    }
+
+    async procesarRespuestaProblema(respuesta) {
+        this.currentQuestionIndex++;
+        await this.hacerSiguientePregunta();
+    }
+
+    async mostrarSoluciones() {
+        try {
+            // Obtener el problema completo con soluciones
+            const { data: problema, error } = await this.supabase
+                .from('problemas')
+                .select('soluciones, identificador, descripcion')
+                .eq('id', this.currentProblem.id)
+                .single();
+
+            if (error) throw error;
+
+            this.addMessage('bot', '✅ Basándome en tus respuestas, aquí están las soluciones recomendadas:');
+            
+            problema.soluciones.forEach((solucion, index) => {
+                this.addMessage('bot', `${index + 1}. ${solucion}`);
             });
 
-            if (score > bestMatchScore) {
-                bestMatchScore = score;
-                matchedProblem = problemKey;
-            }
-        }
+            // Registrar la consulta
+            await this.registrarConsulta(
+                `Problema: ${this.currentCategory} - ${problema.identificador}`,
+                problema.soluciones.join(' | ')
+            );
 
-        if (matchedProblem) {
-            this.currentProblem = matchedProblem;
-            this.currentQuestionIndex = 0;
-            this.askNextQuestion();
-        } else {
-            this.addMessage('bot', 'No logro identificar exactamente el problema. ¿Podrías describirlo de otra manera?');
-            this.presentProblems(this.currentCategory);
-        }
-    }
+            // Actualizar estadísticas del problema
+            await this.actualizarEstadisticasProblema(this.currentProblem.id);
 
-    processProblemAnswer(answer) {
-        const problem = this.knowledgeBase[this.currentCategory][this.currentProblem];
-        
-        if (this.currentQuestionIndex < problem.preguntas.length - 1) {
-            this.currentQuestionIndex++;
-            this.askNextQuestion();
-        } else {
-            this.provideSolution();
+            this.addMessage('bot', '¿Te fue útil esta solución? Puedes calificarla o reiniciar el diagnóstico.');
+            
+            this.diagnosisActive = false;
+            this.updateStats();
+
+        } catch (error) {
+            console.error('Error mostrando soluciones:', error);
+            this.addMessage('bot', 'Error al cargar las soluciones. Intenta nuevamente.');
         }
     }
 
-    presentProblems(category) {
-        const problems = this.knowledgeBase[category];
-        let message = `Problemas comunes de ${this.getCategoryDisplayName(category)}:\n\n`;
-        
-        Object.keys(problems).forEach((problemKey, index) => {
-            const problem = problems[problemKey];
-            // Usar la primera pregunta como descripción del problema
-            const description = problem.preguntas[0].replace('¿', '').replace('?', '');
-            message += `${index + 1}. ${description}\n`;
-        });
-        
-        message += '\n¿Cuál de estos problemas se parece más al tuyo? (Responde con el número o descríbelo)';
-        this.addMessage('bot', message);
-    }
+    async registrarConsulta(consulta, respuesta) {
+        try {
+            const { error } = await this.supabase
+                .from('consultas_usuarios')
+                .insert({
+                    session_id: this.sessionId,
+                    pregunta_usuario: consulta,
+                    respuesta_bot: respuesta,
+                    categoria_detectada: this.currentCategory,
+                    problema_id: this.currentProblem.id,
+                    preguntas_realizadas: this.currentQuestionIndex
+                });
 
-    askNextQuestion() {
-        const problem = this.knowledgeBase[this.currentCategory][this.currentProblem];
-        const question = problem.preguntas[this.currentQuestionIndex];
-        this.addMessage('bot', question);
-    }
+            if (error) throw error;
 
-    provideSolution() {
-        const problem = this.knowledgeBase[this.currentCategory][this.currentProblem];
-        this.addMessage('bot', '¡Perfecto! Basándome en tus respuestas, aquí están las soluciones recomendadas:');
-        
-        problem.soluciones.forEach((solucion, index) => {
-            this.addMessage('bot', `${index + 1}. ${solucion}`);
-        });
-        
-        this.addMessage('bot', '¿Te fue útil esta solución? Si el problema persiste, puedes reiniciar el diagnóstico.');
-        
-        // Registrar la consulta
-        this.logConsultation(
-            `Problema: ${this.currentCategory} - ${this.currentProblem}`,
-            problem.soluciones.join(' | ')
-        );
-        
-        this.diagnosticsCount++;
-        this.updateStats();
-        this.diagnosisActive = false;
-    }
-
-    logConsultation(consulta, respuesta) {
-        fetch('log_consulta.php', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                consulta: consulta,
-                respuesta: respuesta
-            })
-        }).catch(error => {
+        } catch (error) {
             console.error('Error registrando consulta:', error);
-        });
+        }
     }
 
+    async actualizarEstadisticasProblema(problemaId) {
+        try {
+            const { error } = await this.supabase
+                .rpc('incrementar_consultas', { 
+                    problema_id: problemaId 
+                });
+
+            if (error) throw error;
+
+        } catch (error) {
+            console.error('Error actualizando estadísticas:', error);
+        }
+    }
+
+    async updateStats() {
+        try {
+            const problemsCount = document.getElementById('problemsCount');
+            const diagnosticsCount = document.getElementById('diagnosticsCount');
+
+            // Contar problemas activos
+            const { data: problemas, error } = await this.supabase
+                .from('problemas')
+                .select('id', { count: 'exact' })
+                .eq('activo', true);
+
+            if (!error && problemas) {
+                problemsCount.textContent = problemas.length;
+            }
+
+            // Contar consultas en esta sesión
+            const { data: consultas, error: errorConsultas } = await this.supabase
+                .from('consultas_usuarios')
+                .select('id', { count: 'exact' })
+                .eq('session_id', this.sessionId);
+
+            if (!errorConsultas && consultas) {
+                diagnosticsCount.textContent = consultas.length;
+            }
+
+        } catch (error) {
+            console.error('Error actualizando stats:', error);
+        }
+    }
+
+    // Métodos auxiliares (sin cambios)
     addMessage(sender, content) {
         const chatMessages = document.getElementById('chatMessages');
         const messageDiv = document.createElement('div');
@@ -246,17 +357,11 @@ class CyclopsBot {
         
         const avatarDiv = document.createElement('div');
         avatarDiv.className = 'message-avatar';
-        
-        if (sender === 'bot') {
-            avatarDiv.innerHTML = '<div class="mini-eye"></div>';
-        } else {
-            avatarDiv.innerHTML = '👤';
-        }
+        avatarDiv.innerHTML = sender === 'bot' ? '<div class="mini-eye"></div>' : '👤';
         
         const contentDiv = document.createElement('div');
         contentDiv.className = 'message-content';
         
-        // Procesar contenido con saltos de línea
         const paragraphs = content.split('\n');
         paragraphs.forEach(paragraph => {
             if (paragraph.trim() !== '') {
@@ -269,9 +374,19 @@ class CyclopsBot {
         messageDiv.appendChild(avatarDiv);
         messageDiv.appendChild(contentDiv);
         chatMessages.appendChild(messageDiv);
-        
-        // Scroll to bottom
         chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    handleQuickAction(action) {
+        switch (action) {
+            case 'start':
+                this.addMessage('bot', 'Por favor, describe tu problema técnico:');
+                this.diagnosisActive = true;
+                break;
+            case 'reset':
+                this.resetBot();
+                break;
+        }
     }
 
     resetBot() {
@@ -286,33 +401,6 @@ class CyclopsBot {
         this.initializeBot();
     }
 
-    updateStats() {
-        const problemsCount = document.getElementById('problemsCount');
-        const diagnosticsCount = document.getElementById('diagnosticsCount');
-        
-        if (this.knowledgeBase) {
-            let totalProblems = 0;
-            for (const category in this.knowledgeBase) {
-                totalProblems += Object.keys(this.knowledgeBase[category]).length;
-            }
-            problemsCount.textContent = totalProblems;
-        }
-        
-        diagnosticsCount.textContent = this.diagnosticsCount;
-    }
-
-    // Métodos auxiliares
-    getCategoryKeywords(category) {
-        const keywordMap = {
-            'internet': ['internet', 'wifi', 'red', 'conexión', 'online', 'navegador', 'web'],
-            'hardware': ['hardware', 'disco', 'memoria', 'procesador', 'teclado', 'mouse', 'monitor', 'impresora'],
-            'software': ['software', 'programa', 'aplicación', 'windows', 'mac', 'linux', 'virus', 'malware'],
-            'movil': ['móvil', 'celular', 'teléfono', 'android', 'iphone', 'tablet', 'app']
-        };
-        
-        return keywordMap[category] || [category];
-    }
-
     getCategoryDisplayName(category) {
         const displayNames = {
             'internet': 'Internet y Redes',
@@ -320,17 +408,11 @@ class CyclopsBot {
             'software': 'Software',
             'movil': 'Dispositivos Móviles'
         };
-        
         return displayNames[category] || category;
-    }
-
-    containsKeywords(text, phrase) {
-        const words = phrase.toLowerCase().split(' ');
-        return words.some(word => text.includes(word) && word.length > 3);
     }
 }
 
-// Inicializar el bot cuando se carga la página
+// Inicializar el bot
 document.addEventListener('DOMContentLoaded', () => {
-    new CyclopsBot();
+    new CyclopsBotAvanzado();
 });
