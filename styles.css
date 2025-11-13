@@ -1088,3 +1088,65 @@ body {
     transform: translateY(-2px);
     box-shadow: 0 5px 15px rgba(0, 243, 255, 0.4);
 }
+/* AGREGAR AL FINAL DE styles.css */
+
+/* Correcciones para vista compacta */
+.cyber-chat-messages {
+    max-height: 350px !important; /* Reducir altura */
+    min-height: 250px;
+}
+
+.botones-container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px !important;
+    margin-top: 10px !important;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.cyber-btn {
+    padding: 8px 15px !important;
+    font-size: 0.85rem !important;
+    min-height: auto;
+}
+
+.message.advanced {
+    padding: 10px 15px !important;
+    margin-bottom: 8px !important;
+}
+
+.message-header {
+    margin-bottom: 5px !important;
+}
+
+/* Mejorar responsive */
+@media (max-width: 768px) {
+    .cyber-main {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    
+    .cyber-chat-messages {
+        max-height: 300px !important;
+    }
+    
+    .container {
+        padding: 10px;
+    }
+}
+
+/* Scroll personalizado */
+.cyber-chat-messages::-webkit-scrollbar {
+    width: 6px;
+}
+
+.cyber-chat-messages::-webkit-scrollbar-track {
+    background: rgba(0, 243, 255, 0.1);
+    border-radius: 3px;
+}
+
+.cyber-chat-messages::-webkit-scrollbar-thumb {
+    background: var(--primary);
+    border-radius: 3px;
+}
