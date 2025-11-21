@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CYCLOPSBOT - Diagnóstico Inteligente</title>
-    <link rel="stylesheet" href="public/css/styles.css">
+    <!-- Cambiar rutas relativas para GitHub Pages -->
+    <link rel="stylesheet" href="./public/css/styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;500;600;700&family=Orbitron:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -27,19 +28,19 @@
         </button>
         <div class="theme-options">
             <div class="theme-option" data-theme="cyber-blue">
-                <div class="theme-color"></div>
+                <div class="theme-color cyber-blue"></div>
                 <span>Cyber Azul</span>
             </div>
             <div class="theme-option" data-theme="dark-purple">
-                <div class="theme-color"></div>
+                <div class="theme-color dark-purple"></div>
                 <span>Púrpura Oscuro</span>
             </div>
             <div class="theme-option" data-theme="green-terminal">
-                <div class="theme-color"></div>
+                <div class="theme-color green-terminal"></div>
                 <span>Terminal Verde</span>
             </div>
             <div class="theme-option" data-theme="warm-neutral">
-                <div class="theme-color"></div>
+                <div class="theme-color warm-neutral"></div>
                 <span>Neutral Cálido</span>
             </div>
         </div>
@@ -53,7 +54,7 @@
             
             <div class="status-grid">
                 <div class="status-item">
-                    <div class="status-indicator"></div>
+                    <div class="status-indicator active"></div>
                     <span>IA ACTIVADA</span>
                 </div>
                 <div class="status-item">
@@ -62,7 +63,7 @@
                 </div>
                 <div class="status-item">
                     <i class="fas fa-bolt"></i>
-                    <span>Sistema Operativo</span>
+                    <span>5 Sistemas Operativos</span>
                 </div>
             </div>
         </header>
@@ -88,29 +89,7 @@
                         <div class="category-info">
                             <h3>HARDWARE / PC</h3>
                             <p>Problemas con componentes físicos</p>
-                            <span class="problem-count">150+ soluciones</span>
-                        </div>
-                    </div>
-
-                    <div class="category-card" data-category="software">
-                        <div class="category-icon">
-                            <i class="fas fa-cogs"></i>
-                        </div>
-                        <div class="category-info">
-                            <h3>SOFTWARE / SISTEMA</h3>
-                            <p>Windows, programas, errores</p>
-                            <span class="problem-count">200+ soluciones</span>
-                        </div>
-                    </div>
-
-                    <div class="category-card" data-category="internet">
-                        <div class="category-icon">
-                            <i class="fas fa-wifi"></i>
-                        </div>
-                        <div class="category-info">
-                            <h3>INTERNET / REDES</h3>
-                            <p>Conexión, WiFi, router</p>
-                            <span class="problem-count">120+ soluciones</span>
+                            <span class="problem-count">180+ soluciones</span>
                         </div>
                     </div>
 
@@ -133,6 +112,17 @@
                             <h3>SEGURIDAD DIGITAL</h3>
                             <p>Virus, phishing, protección</p>
                             <span class="problem-count">80+ soluciones</span>
+                        </div>
+                    </div>
+
+                    <div class="category-card" data-category="internet">
+                        <div class="category-icon">
+                            <i class="fas fa-wifi"></i>
+                        </div>
+                        <div class="category-info">
+                            <h3>INTERNET / REDES</h3>
+                            <p>Conexión, WiFi, router</p>
+                            <span class="problem-count">120+ soluciones</span>
                         </div>
                     </div>
 
@@ -163,7 +153,7 @@
                             <i class="fas fa-bug"></i>
                         </div>
                         <div class="stat-info">
-                            <span class="stat-number">700+</span>
+                            <span class="stat-number">1700+</span>
                             <span class="stat-label">PROBLEMAS REGISTRADOS</span>
                         </div>
                     </div>
@@ -172,7 +162,7 @@
                             <i class="fas fa-check-circle"></i>
                         </div>
                         <div class="stat-info">
-                            <span class="stat-number">85%</span>
+                            <span class="stat-number">83%</span>
                             <span class="stat-label">EFECTIVIDAD PROMEDIO</span>
                         </div>
                     </div>
@@ -207,7 +197,7 @@
                         </div>
                         <div class="status-item-compact">
                             <i class="fas fa-robot status-ok"></i>
-                            <span>Motor de IA</span>
+                            <span>Módulos de IA</span>
                         </div>
                         <div class="status-item-compact">
                             <i class="fas fa-shield-alt status-ok"></i>
@@ -267,7 +257,8 @@
         </div>
     </div>
 
-    <script src="public/js/script.js"></script>
-<script src="public/js/auth.js"></script></body>
+    <!-- Cambiar rutas de scripts también -->
+    <script src="./public/js/script.js"></script>
+    <script src="./public/js/auth.js"></script>
+</body>
 </html>
-
