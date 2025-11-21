@@ -66,35 +66,42 @@
         }
     
         async handleAdminLogin(e) {
-            e.preventDefault();
+    e.preventDefault();
+    
+    const username = document.getElementById('adminUsername').value;
+    const password = document.getElementById('adminPassword').value;
+    const messageDiv = document.getElementById('authMessage');
+
+    if (!username || !password) {
+        this.showMessage('⚠️ Por favor completa todos los campos', 'error');
+        return;
+    }
+
+    // Simular verificación (luego con Supabase)
+    setTimeout(() => {
+        if (username === this.adminCredentials.username && 
+            password === this.adminCredentials.password) {
             
-            const username = document.getElementById('adminUsername').value;
-            const password = document.getElementById('adminPassword').value;
-            const messageDiv = document.getElementById('authMessage');
-    
-            if (!username || !password) {
-                this.showMessage('⚠️ Por favor completa todos los campos', 'error');
-                return;
-            }
-    
-            // Simular verificación (luego con Supabase)
+            localStorage.setItem('cyclobot_admin', 'true');
+            localStorage.setItem('cyclobot_user', username);
+            
+            this.showMessage('✅ Acceso concedido. Redirigiendo...', 'success');
+            
             setTimeout(() => {
-                if (username === this.adminCredentials.username && 
-                    password === this.adminCredentials.password) {
-                    
-                    localStorage.setItem('cyclobot_admin', 'true');
-                    localStorage.setItem('cyclobot_user', username);
-                    
-                    this.showMessage('✅ Acceso concedido. Redirigiendo...', 'success');
-                    
-                    setTimeout(() => {
-window.location.href = '/admin/dashboard.html';
-                    }, 1500);
+                // CORRECCIÓN: Usar ruta relativa para GitHub Pages
+                const currentPath = window.location.pathname;
+                if (currentPath.includes('/admin/')) {
+                    window.location.href = 'dashboard.html';
                 } else {
-                    this.showMessage('❌ Credenciales incorrectas', 'error');
+                    window.location.href = './admin/dashboard.html';
                 }
-            }, 1000);
+            }, 1500);
+        } else {
+            this.showMessage('❌ Credenciales incorrectas', 'error');
         }
+    }, 1000);
+}
+
     
         redirectToAdminLogin() {
             window.location.href = '/admin/login.html';
@@ -152,3 +159,4 @@ window.location.href = '/admin/dashboard.html';
     // Inicializar sistema de autenticación
     const authSystem = new AuthSystem();
     
+
