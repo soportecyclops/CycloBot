@@ -1,0 +1,164 @@
+{
+  "internet": {
+    "wifi_no_funciona": {
+      "preguntas": [
+        "¿El WiFi no se conecta en ningún dispositivo o solo en uno específico?",
+        "¿La luz del indicador WiFi en el router está encendida o parpadeando?",
+        "¿Aparece el nombre de tu red WiFi en la lista de redes disponibles?"
+      ],
+      "soluciones": [
+        "Reinicia el router desconectándolo por 30 segundos y volviéndolo a conectar",
+        "Verifica si hay cortes reportados por tu proveedor de internet",
+        "Intenta conectar el dispositivo directamente al router con cable ethernet para descartar problemas de WiFi"
+      ]
+    },
+    "internet_lento": {
+      "preguntas": [
+        "¿La velocidad es lenta en todos los dispositivos o solo en uno?",
+        "¿Has realizado un test de velocidad? ¿Qué resultados obtuviste?",
+        "¿El problema ocurre a cualquier hora o en momentos específicos del día?"
+      ],
+      "soluciones": [
+        "Reinicia el router y el módem",
+        "Verifica que no haya descargas pesadas en segundo plano",
+        "Cambia el canal del WiFi desde la configuración del router para evitar interferencias",
+        "Acércate al router para mejorar la señal"
+      ]
+    },
+    "sin_conexion": {
+      "preguntas": [
+        "¿Tienes algún tipo de conexión o está completamente caída?",
+        "¿Las luces del router/módem muestran algún patrón inusual?",
+        "¿Otros dispositivos en la misma red tienen el mismo problema?"
+      ],
+      "soluciones": [
+        "Revisa los cables de conexión y asegúrate de que estén bien conectados",
+        "Contacta a tu proveedor de internet para verificar si hay cortes en tu área",
+        "Reinicia todos los equipos de red (módem, router, etc.)"
+      ]
+    }
+  },
+  "hardware": {
+    "pc_no_enciende": {
+      "preguntas": [
+        "¿Hay alguna luz o sonido cuando presionas el botón de encendido?",
+        "¿El monitor muestra algún mensaje o permanece completamente apagado?",
+        "¿Has verificado que el cable de alimentación esté bien conectado?"
+      ],
+      "soluciones": [
+        "Verifica que el cable de poder esté bien conectado tanto a la PC como al tomacorriente",
+        "Prueba con otro tomacorriente para descartar problemas eléctricos",
+        "Revisa la fuente de alimentación y los cables internos de la motherboard"
+      ]
+    },
+    "disco_duro_lento": {
+      "preguntas": [
+        "¿El equipo tarda mucho en iniciar o en abrir programas?",
+        "¿Escuchas ruidos extraños provenientes del disco duro?",
+        "¿Has verificado el espacio disponible en el disco?"
+      ],
+      "soluciones": [
+        "Ejecuta una herramienta de desfragmentación de disco",
+        "Libera espacio eliminando archivos temporales y programas no utilizados",
+        "Considera reemplazar el disco duro por un SSD para mejor rendimiento",
+        "Realiza un chequeo de errores con CHKDSK (Windows) o fsck (Linux/Mac)"
+      ]
+    },
+    "pantalla_azul": {
+      "preguntas": [
+        "¿La pantalla azul aparece al iniciar el sistema o durante su uso?",
+        "¿Has instalado nuevo hardware o software recientemente?",
+        "¿Aparece algún código de error específico en la pantalla azul?"
+      ],
+      "soluciones": [
+        "Desinstala software o controladores recientemente instalados",
+        "Ejecuta Windows en modo seguro para diagnosticar el problema",
+        "Utiliza la herramienta de reparación del sistema",
+        "Verifica la memoria RAM con herramientas de diagnóstico"
+      ]
+    }
+  },
+  "software": {
+    "windows_lento": {
+      "preguntas": [
+        "¿El equipo ha estado lento desde que lo compraste o el problema es reciente?",
+        "¿Cuántos programas tienes configurados para iniciar con Windows?",
+        "¿Has escaneado el equipo en busca de malware recientemente?"
+      ],
+      "soluciones": [
+        "Ejecuta un análisis completo con un antivirus actualizado",
+        "Desinstala programas que no utilices",
+        "Limita los programas que se inician automáticamente con Windows",
+        "Aumenta la memoria virtual del sistema",
+        "Considera agregar más memoria RAM si es posible"
+      ]
+    },
+    "programa_no_inicia": {
+      "preguntas": [
+        "¿El programa muestra algún mensaje de error al intentar abrirlo?",
+        "¿Todos los programas tienen este problema o solo uno específico?",
+        "¿Has reinstalado el programa recientemente?"
+      ],
+      "soluciones": [
+        "Reinstala el programa afectado",
+        "Verifica que tu sistema cumpla con los requisitos mínimos del programa",
+        "Ejecuta el programa como administrador",
+        "Actualiza los controladores de tu tarjeta gráfica"
+      ]
+    },
+    "virus_malware": {
+      "preguntas": [
+        "¿Notas ventanas emergentes inusuales o redirecciones en el navegador?",
+        "¿El equipo se comporta de forma extraña o más lento de lo normal?",
+        "¿Has instalado software de fuentes no confiables recientemente?"
+      ],
+      "soluciones": [
+        "Ejecuta un análisis completo con un antivirus actualizado",
+        "Utiliza herramientas especializadas como Malwarebytes para eliminar malware",
+        "Restaura el sistema a un punto anterior cuando funcionaba correctamente",
+        "En casos extremos, considera formatear y reinstalar el sistema operativo"
+      ]
+    }
+  },
+  "movil": {
+    "bateria_dura_poco": {
+      "preguntas": [
+        "¿La batería se agota rápidamente incluso con uso normal?",
+        "¿El teléfono se calienta excesivamente durante el uso?",
+        "¿Has revisado qué aplicaciones consumen más batería?"
+      ],
+      "soluciones": [
+        "Reduce el brillo de la pantalla y limita el uso de funciones como GPS y Bluetooth",
+        "Cierra aplicaciones que no estés utilizando",
+        "Desactiva la actualización automática de aplicaciones en segundo plano",
+        "Considera reemplazar la batería si el teléfono tiene más de 2 años"
+      ]
+    },
+    "sin_senal": {
+      "preguntas": [
+        "¿El problema es constante o intermitente?",
+        "¿Ocurre en todas las ubicaciones o solo en lugares específicos?",
+        "¿Has verificado que la tarjeta SIM esté bien insertada?"
+      ],
+      "soluciones": [
+        "Activa y desactiva el modo avión",
+        "Reinicia el dispositivo",
+        "Verifica que la tarjeta SIM esté correctamente insertada",
+        "Contacta a tu operador para verificar si hay problemas en la red"
+      ]
+    },
+    "pantalla_tactil_no_responde": {
+      "preguntas": [
+        "¿La pantalla no responde en absoluto o solo en ciertas áreas?",
+        "¿Has instalado una protector de pantalla recientemente?",
+        "¿El problema ocurre solo cuando el dispositivo está cargando?"
+      ],
+      "soluciones": [
+        "Limpia la pantalla con un paño suave y seco",
+        "Retira el protector de pantalla si está dañado o mal instalado",
+        "Reinicia el dispositivo",
+        "Si el problema persiste, puede requerir reparación del digitizador"
+      ]
+    }
+  }
+}

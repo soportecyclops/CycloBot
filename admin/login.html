@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CycloBot - Acceso Administración</title>
+    <link rel="stylesheet" href="../public/css/auth.css">
+    <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;500;600;700&family=Orbitron:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="auth-header">
+                <h1>?? CYCLOPSBOT</h1>
+                <p>PANEL DE ADMINISTRACIÓN</p>
+            </div>
+
+            <form id="adminLoginForm" class="auth-form">
+                <div class="form-group">
+                    <label for="adminUsername">
+                        <i class="fas fa-user"></i> Usuario Administrador
+                    </label>
+                    <input type="text" id="adminUsername" required placeholder="admin">
+                </div>
+
+                <div class="form-group">
+                    <label for="adminPassword">
+                        <i class="fas fa-lock"></i> Contraseña
+                    </label>
+                    <input type="password" id="adminPassword" required placeholder="••••••••">
+                </div>
+
+                <button type="submit" class="auth-btn">
+                    <i class="fas fa-shield-alt"></i> Acceder al Panel
+                </button>
+            </form>
+
+            <div class="auth-footer">
+                <p>¿Eres usuario normal? El bot principal está disponible para todos.</p>
+                <a href="../index.html" class="back-link">
+                    <i class="fas fa-arrow-left"></i> Volver al CycloBot Principal
+                </a>
+            </div>
+
+            <div id="authMessage" class="auth-message"></div>
+        </div>
+    </div>
+
+    <script src="../public/js/auth.js"></script>
+</body>
+</html>

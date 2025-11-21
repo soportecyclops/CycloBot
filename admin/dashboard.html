@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Administración - CycloBot</title>
+    <link rel="stylesheet" href="../public/css/admin.css">
+    <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;500;600;700&family=Orbitron:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Protección de ruta -->
+    <script>
+        if (!localStorage.getItem('cyclobot_admin') || 
+            localStorage.getItem('cyclobot_admin') !== 'true') {
+            window.location.href = 'login.html';
+        }
+    </script>
+</head>
+<body>
+    <div class="admin-container">
+        <!-- Header -->
+        <header class="admin-header">
+            <div class="admin-brand">
+                <h1>🛡️ PANEL DE ADMINISTRACIÓN</h1>
+                <span>CycloBot v2.5.0</span>
+            </div>
+            <div class="admin-user">
+                <span id="adminUser">Administrador</span>
+                <button id="logoutBtn" class="nav-btn logout">
+                    <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+                </button>
+            </div>
+        </header>
+
+        <!-- Navegación -->
+        <nav class="admin-nav">
+            <button class="nav-btn active" data-panel="dashboard">
+                <i class="fas fa-tachometer-alt"></i> Dashboard
+            </button>
+            <button class="nav-btn" data-panel="database">
+                <i class="fas fa-database"></i> Base de Datos
+            </button>
+            <button class="nav-btn" data-panel="stats">
+                <i class="fas fa-chart-bar"></i> Estadísticas
+            </button>
+        </nav>
+
+        <!-- Panel: Dashboard -->
+        <div id="dashboardPanel" class="admin-panel active">
+            <h2>📊 Dashboard del Sistema</h2>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-bug"></i>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-number">700+</span>
+                        <span class="stat-label">Problemas Registrados</span>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-number">85%</span>
+                        <span class="stat-label">Efectividad</span>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-database"></i>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-number status-ok">Conectada</span>
+                        <span class="stat-label">Base de Datos</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="quick-actions">
+                <h3>Acciones Rápidas</h3>
+                <div class="action-buttons">
+                    <button class="btn-primary" onclick="showPanel('database')">
+                        <i class="fas fa-edit"></i> Gestionar Base de Datos
+                    </button>
+                    <button class="btn-primary" onclick="checkDatabase()">
+                        <i class="fas fa-plug"></i> Verificar Conexión BD
+                    </button>
+                    <button class="btn-primary" onclick="exportData()">
+                        <i class="fas fa-download"></i> Exportar Datos
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Panel: Base de Datos -->
+        <div id="databasePanel" class="admin-panel">
+            <h2>🗃️ Gestión de Base de Datos</h2>
+            
+            <div class="database-controls">
+                <div class="control-group">
+                    <h4>Tablas Disponibles</h4>
+                    <select id="tableSelector" class="form-select">
+                        <option value="problems">Problemas</option>
+                        <option value="categories">Categorías</option>
+                        <option value="users">Usuarios</option>
+                    </select>
+                </div>
+                
+                <div class="control-group">
+                    <h4>Acciones</h4>
+                    <button class="btn-success" onclick="loadTableData()">
+                        <i class="fas fa-sync"></i> Cargar Datos
+                    </button>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table class="db-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Categoría</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                        <!-- Datos cargados dinámicamente -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Panel: Estadísticas -->
+        <div id="statsPanel" class="admin-panel">
+            <h2>📈 Estadísticas del Sistema</h2>
+            <div class="stats-content">
+                <p>Estadísticas detalladas del uso del sistema...</p>
+                <!-- Aquí irán gráficos y estadísticas -->
+            </div>
+        </div>
+    </div>
+
+    <script src="../public/js/admin.js"></script>
+</body>
+</html>

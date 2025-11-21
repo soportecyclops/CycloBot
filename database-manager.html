@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CycloBot - Gestor de Base de Datos</title>
+    <style>
+        body { 
+            font-family: 'Arial', sans-serif; 
+            margin: 20px; 
+            background: #1e293b;
+            color: white;
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .panel { background: #2d3748; padding: 20px; border-radius: 10px; margin: 20px 0; }
+        textarea { 
+            width: 100%; 
+            height: 300px; 
+            background: #1a202c; 
+            color: white; 
+            border: 1px solid #4a5568; 
+            padding: 10px; 
+            border-radius: 5px; 
+            font-family: monospace;
+        }
+        button { 
+            background: #2563eb; 
+            color: white; 
+            border: none; 
+            padding: 10px 20px; 
+            border-radius: 5px; 
+            cursor: pointer; 
+            margin: 5px;
+        }
+        button:hover { background: #1d4ed8; }
+        .success { color: #10b981; }
+        .error { color: #ef4444; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>CycloBot - Gestor de Base de Datos</h1>
+        
+        <div class="panel">
+            <h2>Exportar Base de Datos</h2>
+            <button onclick="exportDatabase()">Exportar JSON</button>
+            <textarea id="exportArea" readonly placeholder="Los datos exportados aparecerán aquí..."></textarea>
+        </div>
+
+        <div class="panel">
+            <h2>Importar Base de Datos</h2>
+            <textarea id="importArea" placeholder="Pega aquí el JSON de la base de datos..."></textarea>
+            <button onclick="importDatabase()">Importar JSON</button>
+            <div id="importStatus"></div>
+        </div>
+
+        <div class="panel">
+            <h2>Estructura de la Base de Datos</h2>
+            <pre id="dbStructure">
+// Ejemplo de estructura:
+{
+  "categories": {
+    "technical": {
+      "name": "Problemas Técnicos",
+      "problems": [
+        {
+          "id": "tech-001",
+          "question": "Ejemplo de problema",
+          "solution": "Solución del problema",
+          "keywords": ["palabra1", "palabra2"],
+          "severity": "alta|media|baja",
+          "followUp": "Pregunta de seguimiento opcional"
+        }
+      ]
+    }
+  }
+}
+            </pre>
+        </div>
+    </div>
+
+    <script>
+        function exportDatabase() {
+            if (window.getCycloBotDatabase) {
+                document.getElementById('exportArea').value = getCycloBotDatabase();
+            } else {
+                alert('CycloBot no está cargado. Abre la aplicación principal primero.');
+            }
+        }
+
+        function importDatabase() {
+            const data = document.getElementById('importArea').value;
+            if (!data) {
+                alert('Por favor, pega el JSON en el área de importación.');
+                return;
+            }
+
+            if (window.importCycloBotDatabase) {
+                importCycloBotDatabase(data);
+                document.getElementById('importStatus').innerHTML = 
+                    '<p class="success">Base de datos importada exitosamente!</p>';
+            } else {
+                alert('CycloBot no está cargado. Abre la aplicación principal primero.');
+            }
+        }
+    </script>
+</body>
+</html>

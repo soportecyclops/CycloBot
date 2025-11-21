@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Diagnóstico Base de Datos CycloBot</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .success { color: green; }
+        .error { color: red; }
+        .info { color: blue; }
+        pre { background: #f4f4f4; padding: 10px; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Diagnóstico Base de Datos CycloBot</h1>
+    <button onclick="checkDatabase()">Verificar Base de Datos</button>
+    <div id="result"></div>
+
+    <script>
+        const supabaseUrl = 'https://nmpvbcfbrhtcfyovjzul.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5tdHZiY2Zicmh0Y2Z5b3ZqenVsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MDI5MjU2MTQsImV4cCI6MjAxODUwMTYxNH0.7jKc7wK1rDw1-bnK0ftjNT8nryN7YfgP9uQJw6XyL2A';
+        
+        const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
+        async function checkDatabase() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<p class="info">🔄 Conectando a Supabase...</p>';
+
+            try {
+                // 1. Verificar conexión
+                resultDiv.innerHTML += '<p>✅ Conectado a Supabase</p>';
+
+                // 2. Verificar tabla categories
+                const { data: categories, error: catError } = await supabase
+                    .from('categories')
+                    .select('*');
+
+                if (catError) {
+                    resultDiv.innerHTML += `<p class="error">❌ Error en categories: ${catError.message}</p>`;
+                } else {
+                    resultDiv.innerHTML += `<p class="success">✅ Tabla categories: ${categories.length} registros</p>`;
+                    resultDiv.innerHTML += `<pre>${JSON.stringify(categories, null, 2)}</pre>`;
+                }
+
+                // 3. Verificar tabla problems
+                const { data: problems, error: probError } = await supabase
+                    .from('problems')
+                    .select('*')
+                    .limit(10);
+
+                if (probError) {
+                    resultDiv.innerHTML += `<p class="error">❌ Error en problems: ${probError.message}</p>`;
+                } else {
+                    resultDiv.innerHTML += `<p class="success">✅ Tabla problems: ${problems.length} registros (mostrando primeros 10)</p>`;
+                    resultDiv.innerHTML += `<pre>${JSON.stringify(problems, null, 2)}</pre>`;
+                }
+
+                // 4. Verificar relación entre tablas
+                if (categories && problems) {
+                    const { data: joinedData, error: joinError } = await supabase
+                        .from('problems')
+                        .select(`
+                            *,
+                            categories (name)
+                        `)
+                        .limit(5);
+
+                    if (!joinError) {
+                        resultDiv.innerHTML += `<p class="success">✅ Relación categories-problems funciona correctamente</p>`;
+                    }
+                }
+
+            } catch (error) {
+                resultDiv.innerHTML += `<p class="error">❌ Error general: ${error.message}</p>`;
+            }
+        }
+    </script>
+</body>
+</html>
