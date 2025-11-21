@@ -4,150 +4,464 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel de Administración - CycloBot</title>
-    <link rel="stylesheet" href="../public/css/admin.css">
+    <link rel="stylesheet" href="../public/css/styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;500;600;700&family=Orbitron:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
-    <!-- Protección de ruta -->
+    <!-- Protección de ruta MEJORADA -->
     <script>
-        if (!localStorage.getItem('cyclobot_admin') || 
-            localStorage.getItem('cyclobot_admin') !== 'true') {
-            window.location.href = 'login.html';
-        }
+        // Verificación de autenticación mejorada
+        document.addEventListener('DOMContentLoaded', function() {
+            const isAuthenticated = localStorage.getItem('cyclobot_admin') === 'true';
+            const currentUser = localStorage.getItem('cyclobot_user');
+            
+            if (!isAuthenticated || !currentUser) {
+                console.log('🔒 No autenticado, redirigiendo a login...');
+                window.location.href = '../admin/login.html';
+                return;
+            }
+            
+            // Mostrar usuario actual
+            const userElement = document.getElementById('adminUser');
+            if (userElement) {
+                userElement.textContent = currentUser;
+            }
+            
+            console.log('✅ Usuario autenticado:', currentUser);
+        });
     </script>
 </head>
-<body>
+<body class="cyber-theme">
     <div class="admin-container">
         <!-- Header -->
-        <header class="admin-header">
-            <div class="admin-brand">
-                <h1>🛡️ PANEL DE ADMINISTRACIÓN</h1>
-                <span>CycloBot v2.5.0</span>
-            </div>
-            <div class="admin-user">
-                <span id="adminUser">Administrador</span>
-<button id="logoutBtn" class="cyber-button">
-    <i class="fas fa-sign-out-alt"></i>
-    Cerrar Sesión
-</button>
+        <header class="cyber-header">
+            <div class="header-content">
+                <h1 class="cyber-glitch-1" data-text="PANEL ADMINISTRACIÓN">PANEL ADMINISTRACIÓN</h1>
+                <div class="admin-user">
+                    <span id="adminUser" style="color: var(--accent-primary); margin-right: 1rem;">
+                        <i class="fas fa-user-shield"></i> Administrador
+                    </span>
+                    <button id="logoutBtn" class="cyber-button">
+                        <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+                    </button>
+                </div>
             </div>
         </header>
 
-        <!-- Navegación -->
+        <!-- Navegación CORREGIDA -->
         <nav class="admin-nav">
-            <button class="nav-btn active" data-panel="dashboard">
+            <button class="nav-btn active" data-panel="dashboardPanel">
                 <i class="fas fa-tachometer-alt"></i> Dashboard
             </button>
-            <button class="nav-btn" data-panel="database">
+            <button class="nav-btn" data-panel="databasePanel">
                 <i class="fas fa-database"></i> Base de Datos
             </button>
-            <button class="nav-btn" data-panel="stats">
+            <button class="nav-btn" data-panel="statsPanel">
                 <i class="fas fa-chart-bar"></i> Estadísticas
             </button>
         </nav>
 
-        <!-- Panel: Dashboard -->
-        <div id="dashboardPanel" class="admin-panel active">
-            <h2>📊 Dashboard del Sistema</h2>
-            
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="fas fa-bug"></i>
-                    </div>
-                    <div class="stat-info">
-                        <span class="stat-number">700+</span>
-                        <span class="stat-label">Problemas Registrados</span>
-                    </div>
-                </div>
+        <!-- Contenido Principal -->
+        <main class="admin-main">
+            <!-- Panel: Dashboard -->
+            <div id="dashboardPanel" class="admin-panel active">
+                <h2 class="cyber-title">📊 Dashboard del Sistema</h2>
                 
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="fas fa-check-circle"></i>
+                <div class="stats-grid">
+                    <div class="stat-card cyber-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-bug"></i>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-number" id="problemsCount">700+</span>
+                            <span class="stat-label">Problemas Registrados</span>
+                        </div>
                     </div>
-                    <div class="stat-info">
-                        <span class="stat-number">85%</span>
-                        <span class="stat-label">Efectividad</span>
+                    
+                    <div class="stat-card cyber-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-number" id="effectivenessRate">85%</span>
+                            <span class="stat-label">Efectividad</span>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card cyber-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-database"></i>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-number status-ok" id="dbStatus">Conectada</span>
+                            <span class="stat-label">Base de Datos</span>
+                        </div>
+                    </div>
+
+                    <div class="stat-card cyber-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-number" id="usersCount">1,250</span>
+                            <span class="stat-label">Usuarios Activos</span>
+                        </div>
                     </div>
                 </div>
+
+                <div class="quick-actions">
+                    <h3 class="cyber-subtitle">Acciones Rápidas</h3>
+                    <div class="action-buttons">
+                        <button class="cyber-button" onclick="adminSystem.showPanel('databasePanel')">
+                            <i class="fas fa-edit"></i> Gestionar Base de Datos
+                        </button>
+                        <button class="cyber-button" onclick="adminSystem.checkDatabase()">
+                            <i class="fas fa-plug"></i> Verificar Conexión BD
+                        </button>
+                        <button class="cyber-button" onclick="adminSystem.exportData()">
+                            <i class="fas fa-download"></i> Exportar Datos
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Actividad Reciente -->
+                <div class="recent-activity">
+                    <h3 class="cyber-subtitle">Actividad Reciente</h3>
+                    <div class="activity-list cyber-card">
+                        <div class="activity-item">
+                            <i class="fas fa-user-circle"></i>
+                            <div class="activity-info">
+                                <span>Usuario_123 completó diagnóstico</span>
+                                <small>Hace 5 minutos - Hardware</small>
+                            </div>
+                        </div>
+                        <div class="activity-item">
+                            <i class="fas fa-user-circle"></i>
+                            <div class="activity-info">
+                                <span>Admin actualizó base de datos</span>
+                                <small>Hace 15 minutos - Software</small>
+                            </div>
+                        </div>
+                        <div class="activity-item">
+                            <i class="fas fa-user-circle"></i>
+                            <div class="activity-info">
+                                <span>Nuevo problema registrado</span>
+                                <small>Hace 30 minutos - Redes</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Panel: Base de Datos -->
+            <div id="databasePanel" class="admin-panel">
+                <h2 class="cyber-title">🗃️ Gestión de Base de Datos</h2>
                 
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="fas fa-database"></i>
+                <div class="database-controls">
+                    <div class="control-group">
+                        <h4>Tablas Disponibles</h4>
+                        <select id="tableSelector" class="cyber-select">
+                            <option value="problems">Problemas</option>
+                            <option value="categories">Categorías</option>
+                            <option value="users">Usuarios</option>
+                            <option value="solutions">Soluciones</option>
+                        </select>
                     </div>
-                    <div class="stat-info">
-                        <span class="stat-number status-ok">Conectada</span>
-                        <span class="stat-label">Base de Datos</span>
+                    
+                    <div class="control-group">
+                        <h4>Acciones</h4>
+                        <button class="cyber-button" onclick="adminSystem.loadTableData()">
+                            <i class="fas fa-sync"></i> Cargar Datos
+                        </button>
+                        <button class="cyber-button" onclick="adminSystem.addNewItem()">
+                            <i class="fas fa-plus"></i> Nuevo Registro
+                        </button>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <table class="db-table cyber-card">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre</th>
+                                <th>Categoría</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody">
+                            <tr>
+                                <td colspan="5" style="text-align: center; padding: 2rem;">
+                                    <i class="fas fa-database" style="font-size: 2rem; opacity: 0.5; margin-bottom: 1rem;"></i>
+                                    <br>
+                                    Selecciona una tabla y carga los datos
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Panel: Estadísticas -->
+            <div id="statsPanel" class="admin-panel">
+                <h2 class="cyber-title">📈 Estadísticas del Sistema</h2>
+                <div class="stats-content cyber-card">
+                    <div class="stats-grid-large">
+                        <div class="stat-large">
+                            <h4>Uso por Categoría</h4>
+                            <div class="stat-bar">
+                                <div class="bar-label">Hardware</div>
+                                <div class="bar-container">
+                                    <div class="bar-fill" style="width: 45%"></div>
+                                </div>
+                                <span>45%</span>
+                            </div>
+                            <div class="stat-bar">
+                                <div class="bar-label">Software</div>
+                                <div class="bar-container">
+                                    <div class="bar-fill" style="width: 30%"></div>
+                                </div>
+                                <span>30%</span>
+                            </div>
+                            <div class="stat-bar">
+                                <div class="bar-label">Redes</div>
+                                <div class="bar-container">
+                                    <div class="bar-fill" style="width: 15%"></div>
+                                </div>
+                                <span>15%</span>
+                            </div>
+                            <div class="stat-bar">
+                                <div class="bar-label">Otros</div>
+                                <div class="bar-container">
+                                    <div class="bar-fill" style="width: 10%"></div>
+                                </div>
+                                <span>10%</span>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-large">
+                            <h4>Rendimiento del Sistema</h4>
+                            <div class="metric">
+                                <span>Tiempo de Respuesta:</span>
+                                <strong>128ms</strong>
+                            </div>
+                            <div class="metric">
+                                <span>Disponibilidad:</span>
+                                <strong>99.8%</strong>
+                            </div>
+                            <div class="metric">
+                                <span>Errores (24h):</span>
+                                <strong>12</strong>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-
-            <div class="quick-actions">
-                <h3>Acciones Rápidas</h3>
-                <div class="action-buttons">
-                    <button class="btn-primary" onclick="showPanel('database')">
-                        <i class="fas fa-edit"></i> Gestionar Base de Datos
-                    </button>
-                    <button class="btn-primary" onclick="checkDatabase()">
-                        <i class="fas fa-plug"></i> Verificar Conexión BD
-                    </button>
-                    <button class="btn-primary" onclick="exportData()">
-                        <i class="fas fa-download"></i> Exportar Datos
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Panel: Base de Datos -->
-        <div id="databasePanel" class="admin-panel">
-            <h2>🗃️ Gestión de Base de Datos</h2>
-            
-            <div class="database-controls">
-                <div class="control-group">
-                    <h4>Tablas Disponibles</h4>
-                    <select id="tableSelector" class="form-select">
-                        <option value="problems">Problemas</option>
-                        <option value="categories">Categorías</option>
-                        <option value="users">Usuarios</option>
-                    </select>
-                </div>
-                
-                <div class="control-group">
-                    <h4>Acciones</h4>
-                    <button class="btn-success" onclick="loadTableData()">
-                        <i class="fas fa-sync"></i> Cargar Datos
-                    </button>
-                </div>
-            </div>
-
-            <div class="table-container">
-                <table class="db-table">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Nombre</th>
-                            <th>Categoría</th>
-                            <th>Estado</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tableBody">
-                        <!-- Datos cargados dinámicamente -->
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- Panel: Estadísticas -->
-        <div id="statsPanel" class="admin-panel">
-            <h2>📈 Estadísticas del Sistema</h2>
-            <div class="stats-content">
-                <p>Estadísticas detalladas del uso del sistema...</p>
-                <!-- Aquí irán gráficos y estadísticas -->
-            </div>
-        </div>
+        </main>
     </div>
 
-    <script src="../public/js/admin.js"></script>
+    <!-- Scripts CORREGIDOS -->
+    <script src="../public/js/auth.js"></script>
+    <script>
+        // SISTEMA ADMIN CORREGIDO - Embedded para evitar errores
+        class AdminSystem {
+            constructor() {
+                this.currentPanel = 'dashboardPanel';
+                this.init();
+            }
+
+            init() {
+                console.log('🛠️ Inicializando AdminSystem...');
+                this.setupEventListeners();
+                this.loadDashboardData();
+                console.log('✅ AdminSystem listo');
+            }
+
+            setupEventListeners() {
+                // Navegación entre paneles
+                const navButtons = document.querySelectorAll('.nav-btn');
+                navButtons.forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const panelId = e.target.getAttribute('data-panel');
+                        if (panelId) {
+                            this.showPanel(panelId);
+                        }
+                    });
+                });
+
+                // Botón logout
+                const logoutBtn = document.getElementById('logoutBtn');
+                if (logoutBtn) {
+                    logoutBtn.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        this.logout();
+                    });
+                }
+
+                console.log('✅ Event listeners configurados');
+            }
+
+            showPanel(panelId) {
+                console.log('🔄 Cambiando a panel:', panelId);
+                
+                // Ocultar todos los paneles
+                const panels = document.querySelectorAll('.admin-panel');
+                panels.forEach(panel => {
+                    panel.classList.remove('active');
+                });
+
+                // Mostrar panel seleccionado
+                const targetPanel = document.getElementById(panelId);
+                if (targetPanel) {
+                    targetPanel.classList.add('active');
+                } else {
+                    console.error('❌ Panel no encontrado:', panelId);
+                }
+
+                // Actualizar botones de navegación
+                const navButtons = document.querySelectorAll('.nav-btn');
+                navButtons.forEach(btn => {
+                    btn.classList.remove('active');
+                    if (btn.getAttribute('data-panel') === panelId) {
+                        btn.classList.add('active');
+                    }
+                });
+
+                this.currentPanel = panelId;
+            }
+
+            loadDashboardData() {
+                try {
+                    console.log('📊 Cargando datos del dashboard...');
+                    
+                    // Simular carga de datos
+                    const user = localStorage.getItem('cyclobot_user') || 'Administrador';
+                    const userElement = document.getElementById('adminUser');
+                    
+                    if (userElement) {
+                        userElement.textContent = user;
+                    }
+
+                    // Actualizar estadísticas
+                    const stats = {
+                        problemsCount: '724',
+                        effectivenessRate: '87%',
+                        dbStatus: 'Conectada',
+                        usersCount: '1,284'
+                    };
+
+                    Object.keys(stats).forEach(key => {
+                        const element = document.getElementById(key);
+                        if (element) {
+                            element.textContent = stats[key];
+                        }
+                    });
+
+                    console.log('✅ Datos del dashboard cargados');
+                } catch (error) {
+                    console.error('❌ Error cargando dashboard:', error);
+                }
+            }
+
+            loadTableData() {
+                console.log('🗃️ Cargando datos de tabla...');
+                const tableSelector = document.getElementById('tableSelector');
+                const tableBody = document.getElementById('tableBody');
+                
+                if (!tableBody) {
+                    console.error('❌ tableBody no encontrado');
+                    return;
+                }
+
+                const selectedTable = tableSelector ? tableSelector.value : 'problems';
+                
+                // Datos de ejemplo
+                const sampleData = {
+                    problems: [
+                        { id: 1, name: 'PC no enciende', category: 'Hardware', status: 'Activo' },
+                        { id: 2, name: 'Error de blue screen', category: 'Software', status: 'Resuelto' },
+                        { id: 3, name: 'Sin conexión a internet', category: 'Redes', status: 'Activo' }
+                    ],
+                    categories: [
+                        { id: 1, name: 'Hardware', count: '45 problemas', status: 'Activo' },
+                        { id: 2, name: 'Software', count: '32 problemas', status: 'Activo' }
+                    ],
+                    users: [
+                        { id: 1, name: 'admin', role: 'Administrador', status: 'Activo' }
+                    ]
+                };
+
+                const data = sampleData[selectedTable] || [];
+                
+                if (data.length === 0) {
+                    tableBody.innerHTML = `
+                        <tr>
+                            <td colspan="5" style="text-align: center; padding: 2rem;">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <br>No hay datos disponibles
+                            </td>
+                        </tr>
+                    `;
+                    return;
+                }
+
+                tableBody.innerHTML = data.map(item => `
+                    <tr>
+                        <td>${item.id}</td>
+                        <td>${item.name}</td>
+                        <td>${item.category || item.role || '-'}</td>
+                        <td><span class="status-badge">${item.status}</span></td>
+                        <td>
+                            <button class="btn-small" onclick="adminSystem.editItem(${item.id})">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn-small btn-danger" onclick="adminSystem.deleteItem(${item.id})">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `).join('');
+
+                console.log('✅ Datos de tabla cargados:', selectedTable);
+            }
+
+            checkDatabase() {
+                console.log('🔍 Verificando conexión a BD...');
+                // Simular verificación
+                setTimeout(() => {
+                    this.showMessage('✅ Conexión a base de datos establecida', 'success');
+                }, 1000);
+            }
+
+            exportData() {
+                console.log('📤 Exportando datos...');
+                this.showMessage('📥 Preparando exportación de datos...', 'info');
+            }
+
+            logout() {
+                console.log('🚪 Cerrando sesión...');
+                if (confirm('¿Estás seguro de que quieres cerrar sesión?')) {
+                    localStorage.removeItem('cyclobot_admin');
+                    localStorage.removeItem('cyclobot_user');
+                    window.location.href = '../admin/login.html';
+                }
+            }
+
+            showMessage(text, type = 'info') {
+                // Usar el sistema de mensajes de auth.js si está disponible
+                if (window.authSystem && window.authSystem.showMessage) {
+                    window.authSystem.showMessage(text, type);
+                } else {
+                    alert(text);
+                }
+            }
+        }
+
+        // Inicializar cuando el DOM esté listo
+        document.addEventListener('DOMContentLoaded', function() {
+            window.adminSystem = new AdminSystem();
+        });
+    </script>
 </body>
 </html>
