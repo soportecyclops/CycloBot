@@ -1,9 +1,9 @@
-// Sistema de autenticación MEJORADO para CycloBot
+// Sistema de autenticaciÃ³n MEJORADO para CycloBot
 class AuthSystem {
     constructor() {
         this.adminCredentials = {
             username: 'admin',
-            password: 'admin123' // CAMBIAR EN PRODUCCIÓN
+            password: 'S0p0rt35' // CAMBIAR EN PRODUCCIÃ“N
         };
         this.init();
     }
@@ -17,14 +17,14 @@ class AuthSystem {
     checkAdminAccess() {
         const currentPath = window.location.pathname;
         
-        // Si está en panel admin sin autenticación, redirigir a login
+        // Si estÃ¡ en panel admin sin autenticaciÃ³n, redirigir a login
         if (currentPath.includes('/admin/dashboard.html') && 
             !this.isAdminAuthenticated()) {
             window.location.href = '/admin/login.html';
             return;
         }
 
-        // Si está en login ya autenticado, redirigir a dashboard
+        // Si estÃ¡ en login ya autenticado, redirigir a dashboard
         if (currentPath.includes('/admin/login.html') && 
             this.isAdminAuthenticated()) {
             window.location.href = '/admin/dashboard.html';
@@ -38,13 +38,13 @@ class AuthSystem {
             adminLoginForm.addEventListener('submit', (e) => this.handleAdminLogin(e));
         }
 
-        // Botón login en index principal
+        // BotÃ³n login en index principal
         const mainLoginBtn = document.getElementById('loginBtn');
         if (mainLoginBtn && !mainLoginBtn.onclick) {
             mainLoginBtn.addEventListener('click', () => this.redirectToAdminLogin());
         }
 
-        // Botón logout en admin
+        // BotÃ³n logout en admin
         const logoutBtn = document.getElementById('logoutBtn');
         if (logoutBtn) {
             logoutBtn.addEventListener('click', () => this.logout());
@@ -56,10 +56,10 @@ class AuthSystem {
         const userStatus = document.getElementById('userStatus');
         if (userStatus) {
             if (this.isAdminAuthenticated()) {
-                userStatus.innerHTML = '?? Administrador';
+                userStatus.innerHTML = 'ðŸ‘¨â€ðŸ’¼ Administrador';
                 userStatus.style.color = '#60a5fa';
             } else {
-                userStatus.innerHTML = '?? Invitado';
+                userStatus.innerHTML = 'ðŸ‘¤ Invitado';
                 userStatus.style.color = '#94a3b8';
             }
         }
@@ -73,11 +73,11 @@ class AuthSystem {
         const messageDiv = document.getElementById('authMessage');
 
         if (!username || !password) {
-            this.showMessage('? Por favor completa todos los campos', 'error');
+            this.showMessage('âš ï¸ Por favor completa todos los campos', 'error');
             return;
         }
 
-        // Simular verificación (luego con Supabase)
+        // Simular verificaciÃ³n (luego con Supabase)
         setTimeout(() => {
             if (username === this.adminCredentials.username && 
                 password === this.adminCredentials.password) {
@@ -85,13 +85,13 @@ class AuthSystem {
                 localStorage.setItem('cyclobot_admin', 'true');
                 localStorage.setItem('cyclobot_user', username);
                 
-                this.showMessage('? Acceso concedido. Redirigiendo...', 'success');
+                this.showMessage('âœ… Acceso concedido. Redirigiendo...', 'success');
                 
                 setTimeout(() => {
                     window.location.href = 'dashboard.html';
                 }, 1500);
             } else {
-                this.showMessage('? Credenciales incorrectas', 'error');
+                this.showMessage('âŒ Credenciales incorrectas', 'error');
             }
         }, 1000);
     }
@@ -103,7 +103,7 @@ class AuthSystem {
     logout() {
         localStorage.removeItem('cyclobot_admin');
         localStorage.removeItem('cyclobot_user');
-        this.showMessage('?? Sesión cerrada. Redirigiendo...', 'success');
+        this.showMessage('ðŸ‘‹ SesiÃ³n cerrada. Redirigiendo...', 'success');
         
         setTimeout(() => {
             window.location.href = '/index.html';
@@ -122,18 +122,20 @@ class AuthSystem {
             // Crear uno si no existe
             messageDiv = document.createElement('div');
             messageDiv.id = 'authMessage';
-            messageDiv.style.cssText = \
-                position: fixed;
-                top: 20px;
-                right: 20px;
-                padding: 15px 20px;
-                border-radius: 8px;
-                color: white;
-                font-weight: 600;
-                z-index: 10000;
-                max-width: 300px;
-                box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-            \;
+            
+            // Aplicar estilos correctamente
+            messageDiv.style.position = 'fixed';
+            messageDiv.style.top = '20px';
+            messageDiv.style.right = '20px';
+            messageDiv.style.padding = '15px 20px';
+            messageDiv.style.borderRadius = '8px';
+            messageDiv.style.color = 'white';
+            messageDiv.style.fontWeight = '600';
+            messageDiv.style.zIndex = '10000';
+            messageDiv.style.maxWidth = '300px';
+            messageDiv.style.boxShadow = '0 5px 15px rgba(0,0,0,0.3)';
+            messageDiv.style.transition = 'all 0.3s ease';
+            
             document.body.appendChild(messageDiv);
         }
 
@@ -147,5 +149,5 @@ class AuthSystem {
     }
 }
 
-// Inicializar sistema de autenticación
+// Inicializar sistema de autenticaciÃ³n
 const authSystem = new AuthSystem();
