@@ -1,4 +1,4 @@
-// chat-diagnostic-real.js - Versión simplificada y funcional
+// chat-diagnostic-real.js - Manteniendo el nombre actual
 class DiagnosticChat {
     constructor() {
         this.supabase = null
@@ -13,7 +13,7 @@ class DiagnosticChat {
         console.log('💬 Inicializando sistema de chat...')
         this.supabase = new SupabaseClient()
         
-        // Esperar conexión sin timeout estricto
+        // Esperar conexión
         await new Promise(resolve => {
             const checkConnection = setInterval(() => {
                 if (this.supabase.connected !== null) {
@@ -22,8 +22,6 @@ class DiagnosticChat {
                 }
             }, 100)
         })
-        
-        console.log('✅ Sistema de chat listo')
     }
 
     async startDiagnostic(category) {
@@ -44,7 +42,7 @@ class DiagnosticChat {
             this.problemFlow = await this.supabase.getProblemsByCategory(category)
             
             if (!this.problemFlow || this.problemFlow.length === 0) {
-                this.showMessage('❌ No hay problemas configurados para esta categoría', 'bot')
+                this.showMessage('❌ No hay problemas para esta categoría', 'bot')
                 return
             }
 
@@ -120,13 +118,13 @@ class DiagnosticChat {
         setTimeout(() => {
             const solutions = problem.soluciones && problem.soluciones.length > 0 ? 
                 `<ol>${problem.soluciones.map(sol => `<li>${sol}</li>`).join('')}</ol>` :
-                `<p>${problem.causa_probable || 'Consulta con técnico especializado'}</p>`
+                `<p>${problem.causa_probable || 'Consulta con técnico'}</p>`
             
             const solutionHTML = `
                 <div class="solution-box">
                     <h4>🎯 Diagnóstico Finalizado</h4>
-                    <p><strong>📋 Causa:</strong> ${problem.causa_probable || 'Identificado'}</p>
-                    <h5>🛠️ Soluciones:</h5>
+                    <p><strong>Causa:</strong> ${problem.causa_probable || 'Identificado'}</p>
+                    <h5>Soluciones:</h5>
                     ${solutions}
                     <button class="restart-btn" onclick="window.diagnosticSystem.restart()">
                         <i class="fas fa-redo"></i> Nuevo Diagnóstico
