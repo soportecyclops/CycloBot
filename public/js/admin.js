@@ -1,13 +1,27 @@
-// Sistema de Administración - CycloBot
+// Sistema de Administración CycloBot - CORREGIDO
 class AdminSystem {
     constructor() {
         this.currentPanel = 'dashboard';
+        this.basePath = window.location.pathname.includes('/CycloBot') ? '/CycloBot' : '';
         this.init();
     }
 
     init() {
+        this.checkAccess();
         this.setupEventListeners();
         this.loadDashboardData();
+        console.log('🛠️ AdminSystem inicializado');
+    }
+
+    checkAccess() {
+        if (!this.isAdminAuthenticated()) {
+            window.location.href = `${this.basePath}/admin/login.html`;
+            return;
+        }
+    }
+
+    isAdminAuthenticated() {
+        return localStorage.getItem('cyclobot_admin') === 'true';
     }
 
     setupEventListeners() {
@@ -20,14 +34,33 @@ class AdminSystem {
         });
 
         // Logout
-        document.getElementById('logoutBtn').addEventListener('click', () => {
-            authSystem.logout();
-        });
+        const logoutBtn = document.getElementById('logoutBtn');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.logout();
+            });
+        }
 
         // Selector de tabla
-        document.getElementById('tableSelector').addEventListener('change', (e) => {
-            this.currentTable = e.target.value;
-        });
+        const tableSelector = document.getElementById('tableSelector');
+        if (tableSelector) {
+            tableSelector.addEventListener('change', (e) => {
+                this.currentTable = e.target.value;
+                this.loadTableData();
+            });
+        }
+
+        // Botones de acción
+        const checkDbBtn = document.getElementById('checkDbBtn');
+        if (checkDbBtn) {
+            checkDbBtn.addEventListener('click', () => this.checkDatabase());
+        }
+
+        const exportBtn = document.getElementById('exportBtn');
+        if (exportBtn) {
+            exportBtn.addEventListener('click', () => this.exportData());
+        }
     }
 
     showPanel(panelName) {
@@ -42,10 +75,16 @@ class AdminSystem {
         });
 
         // Mostrar panel seleccionado
-        document.getElementById(panelName + 'Panel').classList.add('active');
-        
+        const targetPanel = document.getElementById(panelName + 'Panel');
+        if (targetPanel) {
+            targetPanel.classList.add('active');
+        }
+
         // Activar botón correspondiente
-        document.querySelector(`[data-panel="${panelName}"]`).classList.add('active');
+        const targetBtn = document.querySelector(`[data-panel="${panelName}"]`);
+        if (targetBtn) {
+            targetBtn.classList.add('active');
+        }
 
         this.currentPanel = panelName;
 
@@ -71,7 +110,11 @@ class AdminSystem {
 
     async loadTableData() {
         const tableBody = document.getElementById('tableBody');
-        const table = document.getElementById('tableSelector').value;
+        const tableSelector = document.getElementById('tableSelector');
+        
+        if (!tableBody || !tableSelector) return;
+
+        const table = tableSelector.value;
 
         tableBody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 20px;">Cargando datos...</td></tr>';
 
@@ -106,10 +149,10 @@ class AdminSystem {
                             <td>${item.category}</td>
                             <td><span class="status-ok">${item.status}</span></td>
                             <td>
-                                <button class="btn-primary small" onclick="editItem(${item.id})">
+                                <button class="btn-primary small" onclick="adminSystem.editItem(${item.id})">
                                     <i class="fas fa-edit"></i>
                                 </button>
-                                <button class="btn-danger small" onclick="deleteItem(${item.id})">
+                                <button class="btn-danger small" onclick="adminSystem.deleteItem(${item.id})">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </td>
@@ -127,10 +170,14 @@ class AdminSystem {
 
     async checkDatabase() {
         try {
-            alert('🔍 Verificando conexión con Supabase...\n\nNota: Supabase está en mantenimiento hasta el 23/11/2025');
-            // Aquí irá la verificación real cuando Supabase esté disponible
+            this.showMessage('🔍 Verificando conexión con Supabase...', 'info');
+            
+            setTimeout(() => {
+                this.showMessage('⚠️ Supabase en mantenimiento hasta el 23/11/2025', 'warning');
+            }, 2000);
+            
         } catch (error) {
-            alert('❌ Error verificando base de datos: ' + error.message);
+            this.showMessage('❌ Error verificando base de datos', 'error');
         }
     }
 
@@ -152,62 +199,116 @@ class AdminSystem {
             a.click();
             URL.revokeObjectURL(url);
             
+            this.showMessage('✅ Datos exportados correctamente', 'success');
+            
         } catch (error) {
-            alert('❌ Error exportando datos: ' + error.message);
+            this.showMessage('❌ Error exportando datos', 'error');
         }
     }
 
     loadStats() {
-        // Simular carga de estadísticas
         const statsPanel = document.getElementById('statsPanel');
-        statsPanel.querySelector('.stats-content').innerHTML = `
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-number">1,250</div>
-                    <div class="stat-label">Consultas Totales</div>
+        if (statsPanel) {
+            statsPanel.querySelector('.stats-content').innerHTML = `
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number">1,250</div>
+                        <div class="stat-label">Consultas Totales</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">85%</div>
+                        <div class="stat-label">Tasa de Éxito</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">6</div>
+                        <div class="stat-label">Categorías Activas</div>
+                    </div>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-number">85%</div>
-                    <div class="stat-label">Tasa de Éxito</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number">6</div>
-                    <div class="stat-label">Categorías Activas</div>
-                </div>
-            </div>
-        `;
+            `;
+        }
+    }
+
+    editItem(id) {
+        this.showMessage(`✏️ Editando item #${id}`, 'info');
+        // Aquí irá la lógica de edición cuando Supabase esté disponible
+    }
+
+    deleteItem(id) {
+        if (confirm(`¿Estás seguro de que quieres eliminar el item #${id}?`)) {
+            this.showMessage(`🗑️ Item #${id} eliminado (simulación)`, 'success');
+            this.loadTableData(); // Recargar tabla
+        }
+    }
+
+    logout() {
+        // Limpiar auth
+        localStorage.removeItem('cyclobot_admin');
+        localStorage.removeItem('cyclobot_user');
+        
+        this.showMessage('👋 Sesión administrativa cerrada', 'success');
+        
+        setTimeout(() => {
+            window.location.href = `${this.basePath}/index.html`;
+        }, 1000);
+    }
+
+    showMessage(text, type = 'info') {
+        const messageDiv = document.createElement('div');
+        Object.assign(messageDiv.style, {
+            position: 'fixed',
+            top: '20px',
+            right: '20px',
+            padding: '15px 20px',
+            borderRadius: '8px',
+            color: 'white',
+            fontWeight: '600',
+            zIndex: '10000',
+            maxWidth: '300px',
+            boxShadow: '0 5px 15px rgba(0,0,0,0.3)',
+            backgroundColor: this.getMessageColor(type)
+        });
+        
+        messageDiv.textContent = text;
+        document.body.appendChild(messageDiv);
+
+        setTimeout(() => {
+            if (messageDiv.parentNode) {
+                messageDiv.parentNode.removeChild(messageDiv);
+            }
+        }, 4000);
+    }
+
+    getMessageColor(type) {
+        const colors = {
+            'success': '#10b981',
+            'error': '#ef4444',
+            'warning': '#f59e0b',
+            'info': '#3b82f6'
+        };
+        return colors[type] || '#3b82f6';
     }
 }
 
-// Funciones globales para los botones
-function showPanel(panelName) {
-    window.adminSystem.showPanel(panelName);
-}
-
-function checkDatabase() {
-    window.adminSystem.checkDatabase();
-}
-
-function loadTableData() {
-    window.adminSystem.loadTableData();
-}
-
-function exportData() {
-    window.adminSystem.exportData();
-}
-
-function editItem(id) {
-    alert(`Editando item #${id}\n\nEsta funcionalidad estará disponible cuando Supabase se recupere.`);
-}
-
-function deleteItem(id) {
-    if (confirm(`¿Estás seguro de que quieres eliminar el item #${id}?`)) {
-        alert(`Item #${id} eliminado (simulación)\n\nEn producción esto eliminaría el registro de la base de datos.`);
-        loadTableData(); // Recargar tabla
-    }
-}
-
-// Inicializar sistema de administración cuando se cargue la página
+// Inicializar sistema de administración
 document.addEventListener('DOMContentLoaded', () => {
     window.adminSystem = new AdminSystem();
 });
+
+// Funciones globales para compatibilidad
+window.showPanel = (panelName) => {
+    if (window.adminSystem) {
+        window.adminSystem.showPanel(panelName);
+    }
+};
+
+window.checkDatabase = () => {
+    if (window.adminSystem) {
+        window.adminSystem.checkDatabase();
+    }
+};
+
+window.exportData = () => {
+    if (window.adminSystem) {
+        window.adminSystem.exportData();
+    }
+};
