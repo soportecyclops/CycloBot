@@ -1,91 +1,46 @@
-// script.js - Versión optimizada para la nueva interfaz
-
+// script.js - Versión CORREGIDA - Solo interfaz de usuario
 class CycloBot {
     constructor() {
         this.currentTheme = 'cyber-blue';
-        this.currentUser = { role: 'guest', username: 'Invitado' };
         this.init();
     }
 
     init() {
         this.loadTheme();
         this.initEventListeners();
-        this.updateUserInterface();
+        console.log('🎯 CycloBot UI inicializado');
     }
 
-    // Sistema de autenticación simple (luego se integra con Supabase)
-    async authenticate(username, password) {
-        const users = {
-            'admin': { password: 'S0p0rt35', role: 'admin', name: 'Administrador' },
-            'usuario': { password: 'user123', role: 'user', name: 'Usuario' }
-        };
-
-        if (users[username] && users[username].password === password) {
-            this.currentUser = {
-                username: users[username].name,
-                role: users[username].role,
-                loginTime: new Date()
-            };
-            localStorage.setItem('cyclobot_user', JSON.stringify(this.currentUser));
-            return true;
-        }
-        return false;
-    }
-
-    logout() {
-        this.currentUser = { role: 'guest', username: 'Invitado' };
-        localStorage.removeItem('cyclobot_user');
-        this.updateUserInterface();
-    }
-
-    updateUserInterface() {
-        const userStatus = document.getElementById('userStatus');
-        const loginBtn = document.getElementById('loginBtn');
+    // Sistema de temas
+    loadTheme() {
+        const savedTheme = localStorage.getItem('cyclobot-theme') || 'cyber-blue';
+        this.setTheme(savedTheme);
         
-        if (userStatus && loginBtn) {
-            userStatus.textContent = `👤 ${this.currentUser.username}`;
-            
-            if (this.currentUser.role === 'admin') {
-                loginBtn.innerHTML = '<i class="fas fa-cog"></i> Panel Admin';
-                loginBtn.onclick = () => window.location.href = 'admin.html';
-            } else if (this.currentUser.role === 'user') {
-                loginBtn.innerHTML = '<i class="fas fa-user"></i> Mi Cuenta';
-                loginBtn.onclick = () => this.showUserPanel();
-            } else {
-                loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Iniciar Sesión';
-                loginBtn.onclick = () => this.showLoginModal();
-            }
+        // Actualizar selector
+        const themeSelector = document.getElementById('theme-selector');
+        if (themeSelector) {
+            themeSelector.value = savedTheme;
         }
     }
 
-    showLoginModal() {
-        document.getElementById('loginModal').style.display = 'block';
+    setTheme(themeName) {
+        this.currentTheme = themeName;
+        document.documentElement.setAttribute('data-theme', themeName);
+        localStorage.setItem('cyclobot-theme', themeName);
     }
 
-    hideLoginModal() {
-        document.getElementById('loginModal').style.display = 'none';
-    }
-
-    async handleLogin() {
-        const username = document.getElementById('username').value;
-        const password = document.getElementById('password').value;
-        
-        if (await this.authenticate(username, password)) {
-            this.hideLoginModal();
-            this.updateUserInterface();
-            
-            if (this.currentUser.role === 'admin') {
-                setTimeout(() => {
-                    window.location.href = 'admin.html';
-                }, 1000);
-            }
-        } else {
-            alert('Credenciales incorrectas');
-        }
-    }
-
-    // El resto de métodos para la interfaz principal...
+    // Manejadores de eventos de UI
     initEventListeners() {
+        console.log('🔧 Configurando event listeners de UI...');
+        
+        // Selector de temas
+        const themeSelector = document.getElementById('theme-selector');
+        if (themeSelector) {
+            themeSelector.addEventListener('change', (e) => {
+                this.setTheme(e.target.value);
+            });
+        }
+
         // Categorías principales
         document.querySelectorAll('.category-card').forEach(card => {
             card.addEventListener('click', () => {
@@ -102,12 +57,10 @@ class CycloBot {
             });
         });
 
-        // Modal de login
+        // Modal de login (delegado a auth.js)
         document.querySelectorAll('.close-modal').forEach(btn => {
             btn.addEventListener('click', () => this.hideLoginModal());
         });
-
-        document.getElementById('submitLogin')?.addEventListener('click', () => this.handleLogin());
 
         // Cerrar modal al hacer clic fuera
         window.addEventListener('click', (e) => {
@@ -117,28 +70,115 @@ class CycloBot {
         });
     }
 
+    // Manejo de categorías (placeholder para futura implementación)
     handleCategorySelection(category) {
+        console.log(`🎯 Categoría seleccionada: ${category}`);
+        
+        // Mostrar mensaje temporal
+        this.showTempMessage(`🔧 Iniciando diagnóstico de ${category}...`, 'info');
+        
         // Aquí irá la lógica cuando Supabase esté disponible
-        alert(`Categoría seleccionada: ${category}\n\nEsta funcionalidad estará disponible cuando Supabase se recupere.`);
+        setTimeout(() => {
+            this.showTempMessage('⏳ Sistema de diagnóstico en desarrollo...', 'warning');
+        }, 1500);
     }
 
     handleQuickProblem(problem) {
-        alert(`Problema rápido: ${problem}\n\nEsta funcionalidad estará disponible cuando Supabase se recupere.`);
+        console.log(`⚡ Problema rápido: ${problem}`);
+        
+        const problemNames = {
+            'pc-no-enciende': 'PC no enciende',
+            'internet-lento': 'Internet lento', 
+            'pantalla-azul': 'Pantalla azul',
+            'virus': 'Problemas con virus'
+        };
+        
+        const problemName = problemNames[problem] || problem;
+        this.showTempMessage(`🔍 Analizando: ${problemName}...`, 'info');
+        
+        setTimeout(() => {
+            this.showTempMessage('🔄 Conectando con base de datos...', 'warning');
+        }, 2000);
     }
 
-    loadTheme() {
-        const savedTheme = localStorage.getItem('cyclobot-theme') || 'cyber-blue';
-        this.setTheme(savedTheme);
+    // Utilidades de UI
+    showTempMessage(text, type = 'info') {
+        // Crear elemento de mensaje temporal
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `temp-message ${type}`;
+        messageDiv.innerHTML = `
+            <i class="fas fa-${this.getMessageIcon(type)}"></i>
+            ${text}
+        `;
+        
+        // Estilos del mensaje
+        Object.assign(messageDiv.style, {
+            position: 'fixed',
+            top: '20px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            padding: '12px 20px',
+            borderRadius: '8px',
+            color: 'white',
+            fontWeight: '600',
+            zIndex: '10000',
+            maxWidth: '400px',
+            textAlign: 'center',
+            boxShadow: '0 5px 15px rgba(0,0,0,0.3)',
+            backgroundColor: this.getMessageColor(type)
+        });
+        
+        document.body.appendChild(messageDiv);
+        
+        // Remover después de 3 segundos
+        setTimeout(() => {
+            if (messageDiv.parentNode) {
+                messageDiv.parentNode.removeChild(messageDiv);
+            }
+        }, 3000);
     }
 
-    setTheme(themeName) {
-        this.currentTheme = themeName;
-        document.documentElement.setAttribute('data-theme', themeName);
-        localStorage.setItem('cyclobot-theme', themeName);
+    getMessageIcon(type) {
+        const icons = {
+            'info': 'info-circle',
+            'warning': 'exclamation-triangle', 
+            'success': 'check-circle',
+            'error': 'times-circle'
+        };
+        return icons[type] || 'info-circle';
+    }
+
+    getMessageColor(type) {
+        const colors = {
+            'info': '#3b82f6',
+            'warning': '#f59e0b',
+            'success': '#10b981', 
+            'error': '#ef4444'
+        };
+        return colors[type] || '#3b82f6';
+    }
+
+    hideLoginModal() {
+        const modal = document.getElementById('loginModal');
+        if (modal) {
+            modal.style.display = 'none';
+        }
+    }
+
+    // Método para mostrar modal de login (llamado desde auth.js)
+    showLoginModal() {
+        const modal = document.getElementById('loginModal');
+        if (modal) {
+            modal.style.display = 'block';
+        }
     }
 }
 
-// Inicializar
+// Inicializar solo UI cuando el DOM esté listo
 document.addEventListener('DOMContentLoaded', () => {
-    window.cycloBot = new CycloBot();
+    window.cycloBotUI = new CycloBot();
+    console.log('✅ Interfaz de usuario CycloBot cargada');
 });
+
+// Exportar para uso global
+window.CycloBotUI = CycloBot;
