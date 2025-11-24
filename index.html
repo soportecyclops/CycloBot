@@ -8,15 +8,138 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="./public/css/styles.css">
     <style>
-        .diagnostic-flow { display: none; }
-        .diagnostic-flow.active { display: block; }
-        .question-card { background: rgba(30, 41, 59, 0.9); padding: 1.5rem; border-radius: 10px; margin: 1rem 0; }
-        .options-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.8rem; margin: 1rem 0; }
-        .option-btn { padding: 1rem; text-align: left; border: 1px solid #334155; border-radius: 8px; cursor: pointer; transition: all 0.3s; }
-        .option-btn:hover { border-color: #3b82f6; background: rgba(59, 130, 246, 0.1); }
-        .progress-bar { height: 4px; background: #334155; border-radius: 2px; margin: 1rem 0; }
-        .progress-fill { height: 100%; background: #3b82f6; border-radius: 2px; transition: width 0.3s; }
-        .solution-card { background: rgba(16, 185, 129, 0.1); border: 1px solid #10b981; padding: 1.5rem; border-radius: 10px; margin: 1rem 0; }
+        /* Interfaz tipo chat */
+        .chat-container {
+            max-width: 800px;
+            margin: 0 auto;
+            height: calc(100vh - 120px);
+            display: flex;
+            flex-direction: column;
+            background: rgba(15, 23, 42, 0.9);
+            border-radius: 15px;
+            overflow: hidden;
+        }
+        
+        .chat-header {
+            background: rgba(30, 41, 59, 0.95);
+            padding: 1rem;
+            border-bottom: 2px solid #3b82f6;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .status-indicators {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+        
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+        }
+        
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+        
+        .status-online { background: #10b981; }
+        .status-offline { background: #ef4444; }
+        .status-warning { background: #f59e0b; }
+        
+        .chat-messages {
+            flex: 1;
+            padding: 1rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .message {
+            max-width: 80%;
+            padding: 1rem;
+            border-radius: 15px;
+            position: relative;
+        }
+        
+        .message-bot {
+            align-self: flex-start;
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid #334155;
+        }
+        
+        .message-user {
+            align-self: flex-end;
+            background: rgba(59, 130, 246, 0.2);
+            border: 1px solid #3b82f6;
+        }
+        
+        .message-system {
+            align-self: center;
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid #f59e0b;
+            text-align: center;
+            max-width: 90%;
+            font-size: 0.9rem;
+        }
+        
+        .chat-input {
+            padding: 1rem;
+            background: rgba(30, 41, 59, 0.95);
+            border-top: 1px solid #334155;
+        }
+        
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+        
+        .option-btn {
+            padding: 0.8rem 1rem;
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid #3b82f6;
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: left;
+        }
+        
+        .option-btn:hover {
+            background: rgba(59, 130, 246, 0.3);
+            transform: translateY(-2px);
+        }
+        
+        .solution-box {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid #10b981;
+            border-radius: 10px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .restart-btn {
+            margin-top: 1rem;
+            width: 100%;
+            padding: 0.8rem;
+            background: rgba(59, 130, 246, 0.2);
+            border: 1px solid #3b82f6;
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+        }
+        
+        .hidden {
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -27,7 +150,7 @@
                     <i class="fas fa-robot"></i>
                     <h1>CYCLOPS<span class="cyber-text">BOT</span></h1>
                 </div>
-                <p class="tagline">Diagnóstico Inteligente</p>
+                <p class="tagline">Diagnóstico Inteligente por Chat</p>
             </div>
             <div class="user-section">
                 <div class="user-info">
@@ -40,109 +163,67 @@
     </header>
 
     <main class="main-container">
-        <!-- Panel de Categorías Principal -->
-        <section id="categoriesPanel" class="diagnostic-panel active">
-            <div class="panel-header">
-                <h2><i class="fas fa-search"></i> ¿Qué problema tienes?</h2>
-                <p>Selecciona la categoría de tu problema</p>
-            </div>
-
-            <div class="categories-grid">
-                <div class="category-card hardware" data-category="hardware">
-                    <div class="category-icon"><i class="fas fa-desktop"></i></div>
-                    <div class="category-content">
-                        <h3>Hardware</h3>
-                        <p>PC, componentes, periféricos</p>
-                    </div>
+        <div class="chat-container">
+            <!-- Header del Chat con Indicadores -->
+            <div class="chat-header">
+                <div>
+                    <h3><i class="fas fa-comments"></i> Diagnóstico en Tiempo Real</h3>
+                    <p>Respondé las preguntas para encontrar la solución</p>
                 </div>
-
-                <div class="category-card software" data-category="software">
-                    <div class="category-icon"><i class="fas fa-code"></i></div>
-                    <div class="category-content">
-                        <h3>Software</h3>
-                        <p>Windows, programas, errores</p>
+                <div class="status-indicators">
+                    <div class="status-item">
+                        <div id="dbStatus" class="status-dot status-offline"></div>
+                        <span>Base de Datos</span>
                     </div>
-                </div>
-
-                <div class="category-card network" data-category="redes">
-                    <div class="category-icon"><i class="fas fa-wifi"></i></div>
-                    <div class="category-content">
-                        <h3>Redes</h3>
-                        <p>Internet, WiFi, conexiones</p>
+                    <div class="status-item">
+                        <div id="apiStatus" class="status-dot status-offline"></div>
+                        <span>API Sistema</span>
                     </div>
-                </div>
-
-                <div class="category-card security" data-category="seguridad">
-                    <div class="category-icon"><i class="fas fa-shield-alt"></i></div>
-                    <div class="category-content">
-                        <h3>Seguridad</h3>
-                        <p>Virus, malware, protección</p>
-                    </div>
-                </div>
-
-                <div class="category-card celulares" data-category="celulares_moviles">
-                    <div class="category-icon"><i class="fas fa-mobile-alt"></i></div>
-                    <div class="category-content">
-                        <h3>Celulares</h3>
-                        <p>Móviles, apps, conectividad</p>
-                    </div>
-                </div>
-
-                <div class="category-card otros" data-category="otros">
-                    <div class="category-icon"><i class="fas fa-cogs"></i></div>
-                    <div class="category-content">
-                        <h3>Otros</h3>
-                        <p>Problemas diversos</p>
+                    <div class="status-item">
+                        <div id="aiStatus" class="status-dot status-online"></div>
+                        <span>IA Diagnóstico</span>
                     </div>
                 </div>
             </div>
-        </section>
 
-        <!-- Flujo de Diagnóstico -->
-        <section id="diagnosticFlow" class="diagnostic-flow">
-            <div class="panel-header">
-                <h2 id="currentProblem">Diagnóstico en progreso</h2>
-                <p id="problemDescription">Respondé las preguntas para encontrar la solución</p>
+            <!-- Área de Mensajes -->
+            <div id="chatMessages" class="chat-messages">
+                <!-- Mensaje de bienvenida -->
+                <div class="message message-bot">
+                    <strong><i class="fas fa-robot"></i> CycloBot:</strong>
+                    <p>¡Hola! Soy tu asistente de diagnóstico inteligente. Contame, ¿qué problema tenés?</p>
+                    <small>Hace clic en una categoría para empezar</small>
+                </div>
+
+                <!-- Opciones de Categorías -->
+                <div class="message message-bot">
+                    <strong><i class="fas fa-folder"></i> Categorías disponibles:</strong>
+                    <div class="options-grid">
+                        <button class="option-btn" data-category="celulares_moviles">
+                            <i class="fas fa-mobile-alt"></i> Celulares & Móviles
+                        </button>
+                        <button class="option-btn" data-category="software">
+                            <i class="fas fa-code"></i> Software & Programas
+                        </button>
+                        <button class="option-btn" data-category="hardware">
+                            <i class="fas fa-desktop"></i> Hardware & PC
+                        </button>
+                        <button class="option-btn" data-category="redes">
+                            <i class="fas fa-wifi"></i> Redes & Internet
+                        </button>
+                    </div>
+                </div>
             </div>
 
-            <div class="progress-bar">
-                <div id="progressFill" class="progress-fill" style="width: 0%"></div>
+            <!-- Área de Input (se muestra cuando hay preguntas activas) -->
+            <div id="chatInput" class="chat-input hidden">
+                <div id="currentQuestion"></div>
+                <div id="optionsContainer" class="options-grid"></div>
             </div>
-
-            <div id="questionContainer">
-                <!-- Las preguntas se cargan aquí dinámicamente -->
-            </div>
-
-            <div class="quick-actions">
-                <button id="backBtn" class="cyber-button" style="display: none;">
-                    <i class="fas fa-arrow-left"></i> Volver
-                </button>
-                <button id="restartBtn" class="cyber-button">
-                    <i class="fas fa-redo"></i> Reiniciar
-                </button>
-            </div>
-        </section>
-
-        <!-- Resultados -->
-        <section id="resultsPanel" class="diagnostic-flow">
-            <div class="panel-header">
-                <h2><i class="fas fa-check-circle"></i> Diagnóstico Completado</h2>
-                <p>Encontramos la solución a tu problema</p>
-            </div>
-
-            <div id="solutionContent">
-                <!-- Las soluciones se muestran aquí -->
-            </div>
-
-            <div class="quick-actions">
-                <button id="newDiagnosticBtn" class="cyber-button">
-                    <i class="fas fa-plus"></i> Nuevo Diagnóstico
-                </button>
-            </div>
-        </section>
+        </div>
     </main>
 
     <script src="./public/js/auth.js"></script>
-    <script src="./public/js/diagnostic.js"></script>
+    <script src="./public/js/chat-diagnostic.js"></script>
 </body>
 </html>
