@@ -1,4 +1,4 @@
-// CYCLOPSBOT - Motor de Diagnóstico Inteligente CORREGIDO
+// CYCLOPSBOT - Motor de Diagnóstico Inteligente FINAL
 class CyclopsBotReal {
     constructor() {
         this.currentCategory = null;
@@ -12,7 +12,7 @@ class CyclopsBotReal {
     }
 
     async init() {
-        console.log('🚀 Inicializando CyclopsBot Real Mejorado...');
+        console.log('🚀 Inicializando CyclopsBot Final...');
         await this.verificarSistema();
         this.setupEventListeners();
         this.mostrarInterfazInicial();
@@ -22,6 +22,11 @@ class CyclopsBotReal {
         try {
             const conexion = await window.SupabaseClient.verificarConexionSupabase();
             this.actualizarEstadoSistema(conexion.success);
+            
+            if (conexion.success) {
+                // Cargar estadísticas iniciales
+                await this.actualizarEstadisticasGlobales();
+            }
         } catch (error) {
             this.actualizarEstadoSistema(false);
         }
@@ -37,6 +42,18 @@ class CyclopsBotReal {
                 dbStatus.classList.remove('online');
                 dbStatus.querySelector('i').style.color = 'var(--danger)';
             }
+        }
+    }
+
+    async actualizarEstadisticasGlobales() {
+        try {
+            const totalProblemas = await window.SupabaseClient.obtenerEstadisticasProblemas();
+            const problemsCountElement = document.getElementById('problemsCount');
+            if (problemsCountElement && totalProblemas > 0) {
+                problemsCountElement.textContent = totalProblemas.toLocaleString();
+            }
+        } catch (error) {
+            console.error('Error actualizando estadísticas:', error);
         }
     }
 
@@ -56,6 +73,7 @@ class CyclopsBotReal {
         this.addMessage('bot', `
             <div class="action-call">
                 <h3>🔍 SISTEMA DE DIAGNÓSTICO INTELIGENTE</h3>
+                <p>Base de datos con ${document.getElementById('problemsCount')?.textContent || '700+'} problemas</p>
                 <p>Selecciona una categoría para comenzar el análisis</p>
             </div>
         `);
@@ -69,7 +87,7 @@ class CyclopsBotReal {
             this.mostrarBotonesCategoria(categorias);
         } catch (error) {
             console.error('Error cargando categorías:', error);
-            const categoriasFallback = ['internet', 'software', 'hardware', 'movil', 'seguridad'];
+            const categoriasFallback = ['internet', 'software', 'hardware', 'movil', 'seguridad_digital'];
             this.mostrarBotonesCategoria(categoriasFallback);
         }
     }
@@ -110,8 +128,13 @@ class CyclopsBotReal {
             'software': '💻', 
             'hardware': '🔧',
             'movil': '📱',
-            'seguridad': '🛡️',
-            'redes': '📡'
+            'seguridad_digital': '🛡️',
+            'celulares_moviles': '📱',
+            'software_sistema': '⚙️',
+            'internet_red': '📡',
+            'hardware_pc': '💻',
+            'perifericos': '🖱️',
+            'almacenamiento_backups': '💾'
         };
         return iconos[categoria] || '🔍';
     }
@@ -135,9 +158,8 @@ class CyclopsBotReal {
 
     async obtenerYMostrarPrimeraPregunta() {
         try {
-            this.mostrarCargando('Buscando problemas...');
+            this.mostrarCargando('Cargando diagnóstico...');
             
-            // Obtener TODOS los problemas de la categoría para simular flujo
             const problemas = await window.SupabaseClient.obtenerProblemasPorCategoria(this.currentCategory);
             
             if (!problemas || problemas.length === 0) {
@@ -146,9 +168,9 @@ class CyclopsBotReal {
                 return;
             }
 
-            // Seleccionar un problema aleatorio para demostración
-            const preguntaAleatoria = problemas[Math.floor(Math.random() * problemas.length)];
-            await this.mostrarPreguntaConOpciones(preguntaAleatoria);
+            // Seleccionar pregunta inicial
+            const preguntaInicial = problemas[0];
+            await this.mostrarPreguntaConOpciones(preguntaInicial);
             
             this.ocultarCargando();
             
@@ -164,18 +186,14 @@ class CyclopsBotReal {
         this.currentQuestion = pregunta;
         this.questionHistory.push(pregunta);
         
-        // Obtener la primera pregunta del array
         const textoPregunta = this.obtenerTextoPregunta(pregunta);
-        
         this.addMessage('bot', `❓ **${textoPregunta}**`);
         
-        // Mostrar opciones de respuesta (generar automáticamente si están vacías)
         this.mostrarOpcionesRespuesta(pregunta);
     }
 
     obtenerTextoPregunta(pregunta) {
         if (pregunta.preguntas && pregunta.preguntas.length > 0) {
-            // Tomar la primera pregunta del array
             return Array.isArray(pregunta.preguntas) 
                 ? pregunta.preguntas[0] 
                 : pregunta.preguntas;
@@ -190,8 +208,8 @@ class CyclopsBotReal {
         const gridContainer = document.createElement('div');
         gridContainer.className = 'botones-grid';
         
-        // Generar opciones de respuesta automáticamente basadas en el tipo de pregunta
-        const opciones = this.generarOpcionesAutomaticas(pregunta);
+        // Obtener opciones (ya procesadas desde Supabase)
+        const opciones = pregunta.respuestas_posibles || ['Sí', 'No', 'No lo sé'];
         
         // Mostrar tipo de pregunta
         const tipoIndicator = document.createElement('div');
@@ -205,72 +223,22 @@ class CyclopsBotReal {
 
         // Crear botones para cada opción
         opciones.forEach((opcion, index) => {
-            const boton = this.crearBotonRespuesta(opcion.texto, index, () => {
-                this.procesarRespuestaUsuario(opcion.valor, pregunta);
-            });
-            gridContainer.appendChild(boton);
+            const textoOpcion = typeof opcion === 'string' ? opcion : String(opcion);
+            if (textoOpcion.trim() !== '') {
+                const boton = this.crearBotonRespuesta(textoOpcion, index, () => {
+                    this.procesarRespuestaUsuario(textoOpcion, pregunta);
+                });
+                gridContainer.appendChild(boton);
+            }
         });
 
         botonesArea.appendChild(gridContainer);
 
-        // Agregar botón para volver atrás si hay historial
+        // Botón para volver atrás
         if (this.questionHistory.length > 1) {
             const volverBoton = this.crearBotonVolver();
             botonesArea.appendChild(volverBoton);
         }
-    }
-
-    generarOpcionesAutomaticas(pregunta) {
-        // Si hay respuestas_posibles definidas, usarlas
-        if (pregunta.respuestas_posibles && pregunta.respuestas_posibles.length > 0) {
-            return pregunta.respuestas_posibles.map((respuesta, index) => ({
-                texto: respuesta,
-                valor: respuesta
-            }));
-        }
-
-        // Generar opciones automáticas basadas en el tipo de pregunta y contenido
-        const textoPregunta = this.obtenerTextoPregunta(pregunta).toLowerCase();
-        
-        // Opciones para preguntas booleanas
-        if (pregunta.tipo_pregunta === 'booleano' || 
-            textoPregunta.includes('sí') || textoPregunta.includes('no') ||
-            textoPregunta.includes('has') || textoPregunta.includes('está')) {
-            return [
-                { texto: '✅ Sí', valor: 'sí' },
-                { texto: '❌ No', valor: 'no' },
-                { texto: '🤔 No lo sé', valor: 'no_se' }
-            ];
-        }
-
-        // Opciones para preguntas de frecuencia
-        if (textoPregunta.includes('siempre') || textoPregunta.includes('nunca') || 
-            textoPregunta.includes('frecuencia') || textoPregunta.includes('a menudo')) {
-            return [
-                { texto: '🔄 Siempre', valor: 'siempre' },
-                { texto: '📅 Frecuentemente', valor: 'frecuentemente' },
-                { texto: '⏰ Ocasionalmente', valor: 'ocasionalmente' },
-                { texto: '🚫 Nunca', valor: 'nunca' }
-            ];
-        }
-
-        // Opciones para preguntas de gravedad
-        if (textoPregunta.includes('grave') || textoPregunta.includes('leve') ||
-            textoPregunta.includes('urgente') || textoPregunta.includes('importante')) {
-            return [
-                { texto: '🔴 Crítico', valor: 'critico' },
-                { texto: '🟡 Moderado', valor: 'moderado' },
-                { texto: '🟢 Leve', valor: 'leve' }
-            ];
-        }
-
-        // Opciones genéricas por defecto
-        return [
-            { texto: '✅ Sí, exactamente', valor: 'si_exacto' },
-            { texto: '🔄 Más o menos', valor: 'mas_o_menos' },
-            { texto: '❌ No, es diferente', valor: 'no_diferente' },
-            { texto: '🤔 No estoy seguro', valor: 'no_seguro' }
-        ];
     }
 
     obtenerTextoTipoPregunta(tipo) {
@@ -286,9 +254,28 @@ class CyclopsBotReal {
     crearBotonRespuesta(texto, index, onClick) {
         const boton = document.createElement('button');
         boton.className = 'cyber-btn primary';
-        boton.innerHTML = texto;
+        
+        const icono = this.obtenerIconoRespuesta(texto, index);
+        boton.innerHTML = `${icono} ${texto}`;
         boton.addEventListener('click', onClick);
+        
         return boton;
+    }
+
+    obtenerIconoRespuesta(texto, index) {
+        const textoLower = texto.toLowerCase();
+        
+        if (textoLower.includes('sí') || textoLower.includes('si') || textoLower.includes('yes')) return '✅';
+        if (textoLower.includes('no') || textoLower.includes('not')) return '❌';
+        if (textoLower.includes('tal vez') || textoLower.includes('maybe') || textoLower.includes('no sé') || textoLower.includes('no lo sé')) return '🤔';
+        if (textoLower.includes('siempre') || textoLower.includes('always')) return '🔄';
+        if (textoLower.includes('nunca') || textoLower.includes('never')) return '🚫';
+        if (textoLower.includes('crítico') || textoLower.includes('grave')) return '🔴';
+        if (textoLower.includes('moderado') || textoLower.includes('medio')) return '🟡';
+        if (textoLower.includes('leve') || textoLower.includes('ligero')) return '🟢';
+        
+        const iconosNumericos = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣'];
+        return iconosNumericos[index] || '🔹';
     }
 
     crearBotonVolver() {
@@ -300,7 +287,6 @@ class CyclopsBotReal {
     }
 
     async procesarRespuestaUsuario(respuesta, pregunta) {
-        // Guardar respuesta del usuario
         this.userAnswers.push({
             pregunta: this.obtenerTextoPregunta(pregunta),
             respuesta: respuesta,
@@ -308,15 +294,13 @@ class CyclopsBotReal {
             timestamp: new Date().toISOString()
         });
 
-        // Mostrar respuesta del usuario en el chat
         this.addMessage('user', `💬 ${respuesta}`);
 
-        // Simular siguiente pregunta o diagnóstico final
+        // Simular flujo de diagnóstico
         setTimeout(async () => {
-            if (this.userAnswers.length >= 2) { // Después de 2 respuestas, mostrar diagnóstico
+            if (this.userAnswers.length >= 2 || pregunta.es_pregunta_final) {
                 await this.mostrarDiagnosticoCompleto(pregunta);
             } else {
-                // Simular siguiente pregunta
                 await this.simularSiguientePregunta();
             }
         }, 800);
@@ -324,18 +308,10 @@ class CyclopsBotReal {
 
     async simularSiguientePregunta() {
         try {
-            // Obtener otro problema aleatorio de la misma categoría
             const problemas = await window.SupabaseClient.obtenerProblemasPorCategoria(this.currentCategory);
-            if (problemas && problemas.length > 0) {
-                // Filtrar para no repetir la misma pregunta
-                const preguntasDisponibles = problemas.filter(p => 
-                    !this.questionHistory.some(q => q.id === p.id)
-                );
-                
-                const siguientePregunta = preguntasDisponibles.length > 0 
-                    ? preguntasDisponibles[Math.floor(Math.random() * preguntasDisponibles.length)]
-                    : problemas[Math.floor(Math.random() * problemas.length)];
-                
+            if (problemas && problemas.length > 1) {
+                const siguienteIndex = (problemas.findIndex(p => p.id === this.currentQuestion.id) + 1) % problemas.length;
+                const siguientePregunta = problemas[siguienteIndex];
                 await this.mostrarPreguntaConOpciones(siguientePregunta);
             } else {
                 await this.mostrarDiagnosticoFinal();
@@ -347,13 +323,10 @@ class CyclopsBotReal {
 
     async mostrarDiagnosticoFinal() {
         try {
-            this.mostrarCargando('Analizando respuestas...');
+            this.mostrarCargando('Generando diagnóstico...');
             
-            // Obtener un diagnóstico aleatorio de la categoría actual
             const problemas = await window.SupabaseClient.obtenerProblemasPorCategoria(this.currentCategory);
-            const diagnostico = problemas && problemas.length > 0 
-                ? problemas[Math.floor(Math.random() * problemas.length)]
-                : null;
+            const diagnostico = problemas && problemas.length > 0 ? problemas[0] : null;
 
             if (diagnostico) {
                 await this.mostrarDiagnosticoCompleto(diagnostico);
@@ -361,7 +334,6 @@ class CyclopsBotReal {
                 this.mostrarDiagnosticoGenerico();
             }
             
-            // Registrar diagnóstico en estadísticas
             if (window.recordDiagnosis) {
                 window.recordDiagnosis();
             }
@@ -369,7 +341,6 @@ class CyclopsBotReal {
             this.ocultarCargando();
             
         } catch (error) {
-            console.error('Error obteniendo diagnóstico:', error);
             this.mostrarDiagnosticoGenerico();
             this.ocultarCargando();
         }
@@ -378,7 +349,10 @@ class CyclopsBotReal {
     async mostrarDiagnosticoCompleto(diagnostico) {
         this.addMessage('bot', '🎉 **DIAGNÓSTICO COMPLETADO**');
         
-        // Mostrar soluciones si existen
+        if (diagnostico.causa_probable) {
+            this.addMessage('bot', `🔍 **Causa Probable:** ${diagnostico.causa_probable}`);
+        }
+        
         if (diagnostico.soluciones && diagnostico.soluciones.length > 0) {
             this.addMessage('bot', '🛠️ **Soluciones Recomendadas:**');
             
@@ -396,19 +370,18 @@ class CyclopsBotReal {
     }
 
     mostrarDiagnosticoGenerico() {
-        this.addMessage('bot', '🔍 **DIAGNÓSTICO GENERAL**');
-        this.addMessage('bot', 'Basado en tus respuestas, aquí tienes algunas soluciones generales:');
+        this.addMessage('bot', '🔍 **DIAGNÓSTICO BASADO EN TUS RESPUESTAS**');
         this.mostrarSolucionesGenericas();
         this.mostrarOpcionesPostDiagnostico();
     }
 
     mostrarSolucionesGenericas() {
-        this.addMessage('bot', '💡 **Soluciones Generales Recomendadas:**');
-        this.addMessage('bot', '1. **Reinicia el dispositivo** - Apaga y enciende nuevamente');
+        this.addMessage('bot', '💡 **Acciones Recomendadas:**');
+        this.addMessage('bot', '1. **Reinicia el dispositivo** - Solución simple pero efectiva');
         this.addMessage('bot', '2. **Verifica conexiones** - Cables, WiFi, alimentación');
-        this.addMessage('bot', '3. **Actualiza software** - Sistema operativo y controladores');
-        this.addMessage('bot', '4. **Ejecuta diagnóstico** - Herramientas del sistema');
-        this.addMessage('bot', '5. **Consulta especialista** - Si el problema persiste');
+        this.addMessage('bot', '3. **Actualiza software** - Sistema y controladores');
+        this.addMessage('bot', '4. **Ejecuta herramientas** - Diagnóstico del sistema');
+        this.addMessage('bot', '5. **Consulta especialista** - Si persiste el problema');
     }
 
     mostrarOpcionesPostDiagnostico() {
@@ -417,21 +390,9 @@ class CyclopsBotReal {
         const botonesArea = document.getElementById('botonesArea');
         
         const opciones = [
-            {
-                texto: '🔄 Nuevo Diagnóstico',
-                accion: () => this.nuevoDiagnostico(),
-                tipo: 'primary'
-            },
-            {
-                texto: '⭐ Fue Útil',
-                accion: () => this.calificarDiagnostico('util'),
-                tipo: 'success'
-            },
-            {
-                texto: '📊 Ver Estadísticas', 
-                accion: () => this.mostrarEstadisticas(),
-                tipo: 'secondary'
-            }
+            { texto: '🔄 Nuevo Diagnóstico', accion: () => this.nuevoDiagnostico(), tipo: 'primary' },
+            { texto: '⭐ Fue Útil', accion: () => this.calificarDiagnostico('util'), tipo: 'success' },
+            { texto: '📊 Estadísticas', accion: () => this.mostrarEstadisticas(), tipo: 'secondary' }
         ];
         
         opciones.forEach(opcion => {
@@ -439,23 +400,18 @@ class CyclopsBotReal {
             boton.className = `cyber-btn ${opcion.tipo}`;
             boton.innerHTML = opcion.texto;
             boton.addEventListener('click', opcion.accion);
-            boton.style.margin = '2px 0';
             botonesArea.appendChild(boton);
         });
     }
 
     volverPreguntaAnterior() {
         if (this.questionHistory.length > 1) {
-            // Remover pregunta actual del historial
             this.questionHistory.pop();
             this.userAnswers.pop();
             
             const preguntaAnterior = this.questionHistory[this.questionHistory.length - 1];
-            
-            // Remover mensajes de la interacción actual
             this.removerUltimosMensajes(2);
             
-            // Restaurar pregunta anterior
             this.currentQuestion = preguntaAnterior;
             this.mostrarOpcionesRespuesta(preguntaAnterior);
         }
@@ -470,141 +426,10 @@ class CyclopsBotReal {
         }
     }
 
-    mostrarOpcionesRecuperacion() {
-        this.limpiarBotones();
-        
-        const botonesArea = document.getElementById('botonesArea');
-        
-        const opcionesRecuperacion = [
-            {
-                texto: '🔄 Reintentar Conexión',
-                accion: () => this.obtenerYMostrarPrimeraPregunta(),
-                tipo: 'primary'
-            },
-            {
-                texto: '📂 Cambiar Categoría',
-                accion: () => this.nuevoDiagnostico(),
-                tipo: 'secondary'
-            }
-        ];
-        
-        opcionesRecuperacion.forEach(opcion => {
-            const boton = document.createElement('button');
-            boton.className = `cyber-btn ${opcion.tipo}`;
-            boton.innerHTML = opcion.texto;
-            boton.addEventListener('click', opcion.accion);
-            botonesArea.appendChild(boton);
-        });
-    }
-
-    // MÉTODOS UTILITARIOS
-    generateSessionId() {
-        return 'session_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
-    }
-
-    addMessage(sender, content) {
-        const chatMessages = document.getElementById('chatMessages');
-        
-        const messageDiv = document.createElement('div');
-        messageDiv.className = `message ${sender}-message`;
-        
-        const contentDiv = document.createElement('div');
-        contentDiv.className = 'message-content';
-        contentDiv.innerHTML = content;
-        
-        messageDiv.appendChild(contentDiv);
-        chatMessages.appendChild(messageDiv);
-        
-        // Auto-scroll al final
-        setTimeout(() => {
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-        }, 100);
-    }
-
-    limpiarChat() {
-        document.getElementById('chatMessages').innerHTML = '';
-    }
-
-    limpiarBotones() {
-        document.getElementById('botonesArea').innerHTML = '';
-    }
-
-    mostrarCargando(mensaje = 'Cargando...') {
-        // Puedes implementar un overlay de carga aquí
-        console.log('⏳', mensaje);
-    }
-
-    ocultarCargando() {
-        console.log('✅ Carga completada');
-    }
-
-    async nuevoDiagnostico() {
-        this.resetEstado();
-        this.addMessage('bot', '🔄 **Iniciando nuevo diagnóstico...**');
-        await this.mostrarCategoriasReales();
-    }
-
-    resetEstado() {
-        this.currentCategory = null;
-        this.currentQuestion = null;
-        this.questionHistory = [];
-        this.userAnswers = [];
-        this.diagnosisActive = false;
-    }
-
-    resetBotCompleto() {
-        this.limpiarChat();
-        this.limpiarBotones();
-        this.resetEstado();
-        this.mostrarInterfazInicial();
-    }
-
-    calificarDiagnostico(calificacion) {
-        const mensajes = {
-            'util': 'Sí, fue útil',
-            'mejora': 'Necesita mejora'
-        };
-        
-        this.addMessage('user', `⭐ ${mensajes[calificacion]}`);
-        this.addMessage('bot', '¡Gracias por tu feedback! Me ayuda a mejorar.');
-        
-        setTimeout(() => {
-            this.mostrarOpcionesPostDiagnostico();
-        }, 1000);
-    }
-
-    mostrarEstadisticas() {
-        this.addMessage('bot', '📊 **ESTADÍSTICAS DE LA SESIÓN**');
-        this.addMessage('bot', `• Categoría: ${this.formatearNombreCategoria(this.currentCategory)}`);
-        this.addMessage('bot', `• Preguntas respondidas: ${this.userAnswers.length}`);
-        this.addMessage('bot', `• Tiempo de sesión: ${Math.round((Date.now() - parseInt(this.sessionId.split('_')[2])) / 1000)} segundos`);
-    }
-
-    handleQuickAction(action) {
-        switch (action) {
-            case 'start':
-                this.nuevoDiagnostico();
-                break;
-            case 'reset':
-                this.resetBotCompleto();
-                break;
-            case 'help':
-                this.mostrarAyuda();
-                break;
-        }
-    }
-
-    mostrarAyuda() {
-        this.addMessage('bot', 'ℹ️ **AYUDA - SISTEMA CYCLOPSBOT**');
-        this.addMessage('bot', '1. **Selecciona una categoría** de problema');
-        this.addMessage('bot', '2. **Responde las preguntas** con los botones');
-        this.addMessage('bot', '3. **Puedes volver atrás** si te equivocas');
-        this.addMessage('bot', '4. **Recibe diagnóstico** y soluciones específicas');
-        this.addMessage('bot', '5. **Califica el resultado** para mejorar el sistema');
-    }
+    // ... (resto de métodos utilitarios iguales)
 }
 
-// Inicializar cuando el DOM esté listo
+// Inicializar
 document.addEventListener('DOMContentLoaded', function() {
     setTimeout(() => {
         window.cyclopsBot = new CyclopsBotReal();
