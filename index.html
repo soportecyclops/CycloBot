@@ -1,264 +1,116 @@
-<!DOCTYPE html>
-<html lang="es" data-theme="cyber-blue">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CycloBot - Sistema de Diagnóstico Inteligente</title>
-    
-    <!-- Fuentes -->
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- Estilos -->
-    <link rel="stylesheet" href="./public/css/styles.css">
-</head>
-<body>
-    <!-- Header Principal -->
-    <header class="main-header">
-        <div class="header-content">
-            <div class="logo-section">
-                <div class="logo">
-                    <i class="fas fa-robot cyber-glitch"></i>
-                    <h1 id="main-title">CYCLOPS<span class="cyber-text">BOT</span></h1>
-                </div>
-                <p class="tagline">Sistema de Diagnóstico Inteligente</p>
-            </div>
-            
-            <div class="user-section">
-                <div class="user-info">
-                    <span id="userStatus" class="user-status">👤 Invitado</span>
-                    <button id="loginBtn" class="cyber-button">
-                        <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
-                    </button>
-                    <button id="logoutBtn" class="cyber-button logout-btn" style="display: none;">
-                        <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
-                    </button>
-                </div>
-            </div>
-        </div>
-    </header>
+// script.js - Versión Ultra Compacta
+class CycloBot {
+    constructor() {
+        this.currentTheme = 'cyber-blue';
+        this.init();
+    }
 
-    <!-- Contenido Principal -->
-    <main class="main-container">
-        <!-- Panel de Estadísticas -->
-        <aside class="stats-panel" id="stats-panel">
-            <div class="panel-header">
-                <h3><i class="fas fa-chart-bar"></i> Estadísticas</h3>
-            </div>
-            <div class="stats-content">
-                <div class="stat-item">
-                    <div class="stat-value">700+</div>
-                    <div class="stat-label">Problemas Resueltos</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-value">85%</div>
-                    <div class="stat-label">Efectividad</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-value">6</div>
-                    <div class="stat-label">Categorías</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-value">24/7</div>
-                    <div class="stat-label">Disponibilidad</div>
-                </div>
-            </div>
-        </aside>
+    init() {
+        this.loadTheme();
+        this.initEventListeners();
+    }
 
-        <!-- Panel de Diagnóstico Principal -->
-        <section class="diagnostic-panel" id="diagnostic-panel">
-            <div class="panel-header">
-                <h2><i class="fas fa-search"></i> Selecciona una Categoría</h2>
-                <p>Elige el área donde necesitas ayuda</p>
-            </div>
+    loadTheme() {
+        const savedTheme = localStorage.getItem('cyclobot-theme') || 'cyber-blue';
+        this.setTheme(savedTheme);
+        const themeSelector = document.getElementById('theme-selector');
+        if (themeSelector) themeSelector.value = savedTheme;
+    }
 
-            <!-- Grid de Categorías -->
-            <div class="categories-grid">
-                <!-- Hardware -->
-                <div class="category-card hardware" data-category="hardware">
-                    <div class="category-icon">
-                        <i class="fas fa-desktop"></i>
-                    </div>
-                    <div class="category-content">
-                        <h3>Hardware</h3>
-                        <p>Problemas con componentes físicos</p>
-                        <div class="category-stats">
-                            <span class="stat">250+ soluciones</span>
-                            <span class="success-rate">92% éxito</span>
-                        </div>
-                    </div>
-                    <div class="category-hover">
-                        <i class="fas fa-arrow-right"></i>
-                    </div>
-                </div>
+    setTheme(themeName) {
+        this.currentTheme = themeName;
+        document.documentElement.setAttribute('data-theme', themeName);
+        localStorage.setItem('cyclobot-theme', themeName);
+    }
 
-                <!-- Software -->
-                <div class="category-card software" data-category="software">
-                    <div class="category-icon">
-                        <i class="fas fa-code"></i>
-                    </div>
-                    <div class="category-content">
-                        <h3>Software</h3>
-                        <p>Errores de programas y sistema</p>
-                        <div class="category-stats">
-                            <span class="stat">180+ soluciones</span>
-                            <span class="success-rate">88% éxito</span>
-                        </div>
-                    </div>
-                    <div class="category-hover">
-                        <i class="fas fa-arrow-right"></i>
-                    </div>
-                </div>
+    initEventListeners() {
+        // Selector de temas
+        const themeSelector = document.getElementById('theme-selector');
+        if (themeSelector) {
+            themeSelector.addEventListener('change', (e) => this.setTheme(e.target.value));
+        }
 
-                <!-- Redes -->
-                <div class="category-card network" data-category="network">
-                    <div class="category-icon">
-                        <i class="fas fa-wifi"></i>
-                    </div>
-                    <div class="category-content">
-                        <h3>Redes</h3>
-                        <p>Conexiones e internet</p>
-                        <div class="category-stats">
-                            <span class="stat">120+ soluciones</span>
-                            <span class="success-rate">85% éxito</span>
-                        </div>
-                    </div>
-                    <div class="category-hover">
-                        <i class="fas fa-arrow-right"></i>
-                    </div>
-                </div>
+        // Categorías
+        document.querySelectorAll('.category-card').forEach(card => {
+            card.addEventListener('click', () => {
+                const category = card.getAttribute('data-category');
+                this.handleCategorySelection(category);
+            });
+        });
 
-                <!-- Seguridad -->
-                <div class="category-card security" data-category="security">
-                    <div class="category-icon">
-                        <i class="fas fa-shield-alt"></i>
-                    </div>
-                    <div class="category-content">
-                        <h3>Seguridad</h3>
-                        <p>Virus y protección</p>
-                        <div class="category-stats">
-                            <span class="stat">90+ soluciones</span>
-                            <span class="success-rate">95% éxito</span>
-                        </div>
-                    </div>
-                    <div class="category-hover">
-                        <i class="fas fa-arrow-right"></i>
-                    </div>
-                </div>
+        // Botones rápidos
+        document.querySelectorAll('.quick-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const problem = btn.getAttribute('data-problem');
+                this.handleQuickProblem(problem);
+            });
+        });
 
-                <!-- Rendimiento -->
-                <div class="category-card performance" data-category="performance">
-                    <div class="category-icon">
-                        <i class="fas fa-tachometer-alt"></i>
-                    </div>
-                    <div class="category-content">
-                        <h3>Rendimiento</h3>
-                        <p>Optimización y velocidad</p>
-                        <div class="category-stats">
-                            <span class="stat">110+ soluciones</span>
-                            <span class="success-rate">87% éxito</span>
-                        </div>
-                    </div>
-                    <div class="category-hover">
-                        <i class="fas fa-arrow-right"></i>
-                    </div>
-                </div>
+        // Modal
+        document.querySelectorAll('.close-modal').forEach(btn => {
+            btn.addEventListener('click', () => this.hideLoginModal());
+        });
 
-                <!-- Otros -->
-                <div class="category-card other" data-category="other">
-                    <div class="category-icon">
-                        <i class="fas fa-cogs"></i>
-                    </div>
-                    <div class="category-content">
-                        <h3>Otros</h3>
-                        <p>Problemas diversos</p>
-                        <div class="category-stats">
-                            <span class="stat">60+ soluciones</span>
-                            <span class="success-rate">82% éxito</span>
-                        </div>
-                    </div>
-                    <div class="category-hover">
-                        <i class="fas fa-arrow-right"></i>
-                    </div>
-                </div>
-            </div>
+        window.addEventListener('click', (e) => {
+            if (e.target === document.getElementById('loginModal')) {
+                this.hideLoginModal();
+            }
+        });
+    }
 
-            <!-- Botones Rápidos -->
-            <div class="quick-actions">
-                <h3><i class="fas fa-bolt"></i> Problemas Comunes</h3>
-                <div class="quick-buttons">
-                    <button class="quick-btn" data-problem="pc-no-enciende">
-                        <i class="fas fa-power-off"></i> PC no enciende
-                    </button>
-                    <button class="quick-btn" data-problem="internet-lento">
-                        <i class="fas fa-wifi"></i> Internet lento
-                    </button>
-                    <button class="quick-btn" data-problem="pantalla-azul">
-                        <i class="fas fa-exclamation-triangle"></i> Pantalla azul
-                    </button>
-                    <button class="quick-btn" data-problem="virus">
-                        <i class="fas fa-virus"></i> Eliminar virus
-                    </button>
-                </div>
-            </div>
-        </section>
-    </main>
+    handleCategorySelection(category) {
+        const categoryNames = {
+            'hardware': 'Hardware', 'software': 'Software', 'network': 'Redes',
+            'security': 'Seguridad', 'performance': 'Rendimiento', 'other': 'Otros'
+        };
+        this.showTempMessage(`🔧 Diagnóstico: ${categoryNames[category]}`, 'info');
+        setTimeout(() => this.showTempMessage('⏳ Conectando con base de datos...', 'warning'), 1500);
+    }
 
-    <!-- Modal de Login -->
-    <div id="loginModal" class="modal">
-        <div class="modal-content cyber-card">
-            <div class="modal-header">
-                <h2><i class="fas fa-key"></i> Acceso al Sistema</h2>
-                <span class="close-modal">&times;</span>
-            </div>
-            <div class="modal-body">
-                <div class="login-form">
-                    <div class="form-group">
-                        <label for="username"><i class="fas fa-user"></i> Usuario</label>
-                        <input type="text" id="username" placeholder="Ingresa tu usuario">
-                    </div>
-                    <div class="form-group">
-                        <label for="password"><i class="fas fa-lock"></i> Contraseña</label>
-                        <input type="password" id="password" placeholder="Ingresa tu contraseña">
-                    </div>
-                    <button id="submitLogin" class="cyber-button large">
-                        <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
-                    </button>
-                </div>
-                <div class="login-info">
-                    <h4><i class="fas fa-info-circle"></i> Credenciales de Prueba</h4>
-                    <div class="credentials">
-                        <p><strong>Administrador:</strong> admin / S0p0rt35</p>
-                        <p><strong>Usuario:</strong> usuario / user123</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+    handleQuickProblem(problem) {
+        const problemNames = {
+            'pc-no-enciende': 'PC no enciende', 'internet-lento': 'Internet lento', 
+            'pantalla-azul': 'Pantalla azul', 'virus': 'Problemas con virus'
+        };
+        this.showTempMessage(`🔍 Analizando: ${problemNames[problem]}`, 'info');
+        setTimeout(() => this.showTempMessage('🔄 Procesando solución...', 'warning'), 2000);
+    }
 
-    <!-- Footer -->
-    <footer class="main-footer">
-        <div class="footer-content">
-            <div class="footer-section">
-                <h4>CycloBot v2.5.0</h4>
-                <p>Sistema de Diagnóstico Inteligente</p>
-            </div>
-            <div class="footer-section">
-                <div class="theme-selector">
-                    <label for="theme-selector"><i class="fas fa-palette"></i> Tema:</label>
-                    <select id="theme-selector">
-                        <option value="cyber-blue">Cyber Blue</option>
-                        <option value="cyber-green">Cyber Green</option>
-                        <option value="cyber-purple">Cyber Purple</option>
-                        <option value="cyber-red">Cyber Red</option>
-                    </select>
-                </div>
-            </div>
-        </div>
-    </footer>
+    showTempMessage(text, type = 'info') {
+        const messageDiv = document.createElement('div');
+        messageDiv.innerHTML = `<i class="fas fa-${this.getMessageIcon(type)}"></i> ${text}`;
+        Object.assign(messageDiv.style, {
+            position: 'fixed', top: '20px', left: '50%', transform: 'translateX(-50%)',
+            padding: '10px 16px', borderRadius: '6px', color: 'white', fontWeight: '600',
+            zIndex: '10000', maxWidth: '350px', textAlign: 'center', fontSize: '0.85rem',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.3)', backgroundColor: this.getMessageColor(type)
+        });
+        document.body.appendChild(messageDiv);
+        setTimeout(() => messageDiv.remove(), 2500);
+    }
 
-    <!-- Scripts -->
-    <script src="./public/js/auth.js"></script>
-    <script src="./public/js/script.js"></script>
-</body>
-</html>
+    getMessageIcon(type) {
+        return { 'info': 'info-circle', 'warning': 'exclamation-triangle', 
+                'success': 'check-circle', 'error': 'times-circle' }[type] || 'info-circle';
+    }
+
+    getMessageColor(type) {
+        return { 'info': '#3b82f6', 'warning': '#f59e0b', 
+                'success': '#10b981', 'error': '#ef4444' }[type] || '#3b82f6';
+    }
+
+    hideLoginModal() {
+        const modal = document.getElementById('loginModal');
+        if (modal) modal.style.display = 'none';
+    }
+
+    showLoginModal() {
+        const modal = document.getElementById('loginModal');
+        if (modal) modal.style.display = 'block';
+    }
+}
+
+// Inicialización mínima
+document.addEventListener('DOMContentLoaded', () => {
+    window.cycloBotUI = new CycloBot();
+});
