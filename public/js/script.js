@@ -1,184 +1,131 @@
-// script.js - Versión CORREGIDA - Solo interfaz de usuario
-class CycloBot {
-    constructor() {
-        this.currentTheme = 'cyber-blue';
-        this.init();
-    }
+// CYCLOPSBOT - Script de Integración
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🎯 Inicializando CyclopsBot Integration...');
+    
+    // Inicializar efectos visuales
+    inicializarEfectosVisuales();
+    
+    // Configurar tema por defecto
+    aplicarTema('cyber-blue');
+    
+    // Verificar que todos los elementos estén presentes
+    verificarElementosDOM();
+});
 
-    init() {
-        this.loadTheme();
-        this.initEventListeners();
-        console.log('🎯 CycloBot UI inicializado');
-    }
+function inicializarEfectosVisuales() {
+    // Crear partículas dinámicas
+    crearParticulasDinamicas();
+    
+    // Efectos de hover para botones
+    configurarEfectosHover();
+    
+    // Animaciones de estado del sistema
+    configurarAnimacionesEstado();
+}
 
-    // Sistema de temas
-    loadTheme() {
-        const savedTheme = localStorage.getItem('cyclobot-theme') || 'cyber-blue';
-        this.setTheme(savedTheme);
-        
-        // Actualizar selector
-        const themeSelector = document.getElementById('theme-selector');
-        if (themeSelector) {
-            themeSelector.value = savedTheme;
-        }
-    }
-
-    setTheme(themeName) {
-        this.currentTheme = themeName;
-        document.documentElement.setAttribute('data-theme', themeName);
-        localStorage.setItem('cyclobot-theme', themeName);
-    }
-
-    // Manejadores de eventos de UI
-    initEventListeners() {
-        console.log('🔧 Configurando event listeners de UI...');
-        
-        // Selector de temas
-        const themeSelector = document.getElementById('theme-selector');
-        if (themeSelector) {
-            themeSelector.addEventListener('change', (e) => {
-                this.setTheme(e.target.value);
-            });
-        }
-
-        // Categorías principales
-        document.querySelectorAll('.category-card').forEach(card => {
-            card.addEventListener('click', () => {
-                const category = card.getAttribute('data-category');
-                this.handleCategorySelection(category);
-            });
-        });
-
-        // Botones rápidos
-        document.querySelectorAll('.quick-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const problem = btn.getAttribute('data-problem');
-                this.handleQuickProblem(problem);
-            });
-        });
-
-        // Modal de login (delegado a auth.js)
-        document.querySelectorAll('.close-modal').forEach(btn => {
-            btn.addEventListener('click', () => this.hideLoginModal());
-        });
-
-        // Cerrar modal al hacer clic fuera
-        window.addEventListener('click', (e) => {
-            if (e.target === document.getElementById('loginModal')) {
-                this.hideLoginModal();
-            }
-        });
-    }
-
-    // Manejo de categorías (placeholder para futura implementación)
-    handleCategorySelection(category) {
-        console.log(`🎯 Categoría seleccionada: ${category}`);
-        
-        // Mostrar mensaje temporal
-        this.showTempMessage(`🔧 Iniciando diagnóstico de ${category}...`, 'info');
-        
-        // Aquí irá la lógica cuando Supabase esté disponible
-        setTimeout(() => {
-            this.showTempMessage('⏳ Sistema de diagnóstico en desarrollo...', 'warning');
-        }, 1500);
-    }
-
-    handleQuickProblem(problem) {
-        console.log(`⚡ Problema rápido: ${problem}`);
-        
-        const problemNames = {
-            'pc-no-enciende': 'PC no enciende',
-            'internet-lento': 'Internet lento', 
-            'pantalla-azul': 'Pantalla azul',
-            'virus': 'Problemas con virus'
-        };
-        
-        const problemName = problemNames[problem] || problem;
-        this.showTempMessage(`🔍 Analizando: ${problemName}...`, 'info');
-        
-        setTimeout(() => {
-            this.showTempMessage('🔄 Conectando con base de datos...', 'warning');
-        }, 2000);
-    }
-
-    // Utilidades de UI
-    showTempMessage(text, type = 'info') {
-        // Crear elemento de mensaje temporal
-        const messageDiv = document.createElement('div');
-        messageDiv.className = `temp-message ${type}`;
-        messageDiv.innerHTML = `
-            <i class="fas fa-${this.getMessageIcon(type)}"></i>
-            ${text}
-        `;
-        
-        // Estilos del mensaje
-        Object.assign(messageDiv.style, {
-            position: 'fixed',
-            top: '20px',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            padding: '12px 20px',
-            borderRadius: '8px',
-            color: 'white',
-            fontWeight: '600',
-            zIndex: '10000',
-            maxWidth: '400px',
-            textAlign: 'center',
-            boxShadow: '0 5px 15px rgba(0,0,0,0.3)',
-            backgroundColor: this.getMessageColor(type)
-        });
-        
-        document.body.appendChild(messageDiv);
-        
-        // Remover después de 3 segundos
-        setTimeout(() => {
-            if (messageDiv.parentNode) {
-                messageDiv.parentNode.removeChild(messageDiv);
-            }
-        }, 3000);
-    }
-
-    getMessageIcon(type) {
-        const icons = {
-            'info': 'info-circle',
-            'warning': 'exclamation-triangle', 
-            'success': 'check-circle',
-            'error': 'times-circle'
-        };
-        return icons[type] || 'info-circle';
-    }
-
-    getMessageColor(type) {
-        const colors = {
-            'info': '#3b82f6',
-            'warning': '#f59e0b',
-            'success': '#10b981', 
-            'error': '#ef4444'
-        };
-        return colors[type] || '#3b82f6';
-    }
-
-    hideLoginModal() {
-        const modal = document.getElementById('loginModal');
-        if (modal) {
-            modal.style.display = 'none';
-        }
-    }
-
-    // Método para mostrar modal de login (llamado desde auth.js)
-    showLoginModal() {
-        const modal = document.getElementById('loginModal');
-        if (modal) {
-            modal.style.display = 'block';
-        }
+function crearParticulasDinamicas() {
+    const container = document.querySelector('.particles-background');
+    if (!container) return;
+    
+    for (let i = 0; i < 20; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        particle.style.left = Math.random() * 100 + 'vw';
+        particle.style.animationDelay = Math.random() * 15 + 's';
+        particle.style.animationDuration = (Math.random() * 10 + 8) + 's';
+        container.appendChild(particle);
     }
 }
 
-// Inicializar solo UI cuando el DOM esté listo
-document.addEventListener('DOMContentLoaded', () => {
-    window.cycloBotUI = new CycloBot();
-    console.log('✅ Interfaz de usuario CycloBot cargada');
-});
+function configurarEfectosHover() {
+    // Efectos para botones cyber
+    document.addEventListener('mouseover', function(e) {
+        if (e.target.classList.contains('cyber-btn')) {
+            e.target.style.transform = 'translateY(-2px) scale(1.02)';
+            e.target.style.transition = 'all 0.3s ease';
+        }
+    });
+    
+    document.addEventListener('mouseout', function(e) {
+        if (e.target.classList.contains('cyber-btn')) {
+            e.target.style.transform = 'translateY(0) scale(1)';
+        }
+    });
+}
 
-// Exportar para uso global
-window.CycloBotUI = CycloBot;
+function configurarAnimacionesEstado() {
+    // Animación para indicadores de estado
+    const statusItems = document.querySelectorAll('.status-item');
+    statusItems.forEach(item => {
+        item.addEventListener('animationend', function() {
+            this.style.animation = 'none';
+        });
+    });
+}
+
+function aplicarTema(tema) {
+    const root = document.documentElement;
+    
+    const temas = {
+        'cyber-blue': {
+            '--primary': '#00f3ff',
+            '--primary-glow': '#00f3ffaa',
+            '--secondary': '#ff00ff',
+            '--accent': '#00ff88'
+        },
+        'cyber-green': {
+            '--primary': '#00ff88',
+            '--primary-glow': '#00ff88aa',
+            '--secondary': '#ffaa00',
+            '--accent': '#00f3ff'
+        },
+        'cyber-purple': {
+            '--primary': '#aa00ff',
+            '--primary-glow': '#aa00ffaa',
+            '--secondary': '#00f3ff',
+            '--accent': '#ff00aa'
+        },
+        'cyber-red': {
+            '--primary': '#ff0066',
+            '--primary-glow': '#ff0066aa',
+            '--secondary': '#00f3ff',
+            '--accent': '#ffaa00'
+        }
+    };
+    
+    const colores = temas[tema] || temas['cyber-blue'];
+    
+    Object.entries(colores).forEach(([prop, valor]) => {
+        root.style.setProperty(prop, valor);
+    });
+    
+    // Guardar tema preferido
+    localStorage.setItem('cyberbot-theme', tema);
+}
+
+function verificarElementosDOM() {
+    const elementosRequeridos = [
+        'chatMessages',
+        'botonesArea',
+        'problemsCount',
+        'diagnosticsCount'
+    ];
+    
+    elementosRequeridos.forEach(id => {
+        const elemento = document.getElementById(id);
+        if (!elemento) {
+            console.warn(`⚠️ Elemento requerido no encontrado: #${id}`);
+        } else {
+            console.log(`✅ Elemento encontrado: #${id}`);
+        }
+    });
+}
+
+// Utilidades globales
+window.CyberBotUtils = {
+    aplicarTema,
+    crearParticulasDinamicas,
+    verificarElementosDOM
+};
+
+console.log('✅ CyclopsBot Integration cargado correctamente');
