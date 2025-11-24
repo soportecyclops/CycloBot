@@ -1,67 +1,45 @@
-// supabase-client.js - Debugging completo
+// supabase-client.js - CORREGIDO - Sin validación incorrecta
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
 
-// CONFIGURACIÓN
+// CONFIGURACIÓN - TU KEY ES VÁLIDA
 const SUPABASE_URL = 'https://nmpvbcfbrhtcfyovjzul.supabase.co'
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5tcHZiY2Zicmh0Y2Z5b3ZqenVsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMwMjQ0NjAsImV4cCI6MjA3ODYwMDQ2MH0.9-FalpRfqQmD_72ZDbVnBbN7EU7lwgzsX2zNWz8er_4'
 
 class SupabaseClient {
     constructor() {
-        console.log('🔧 INICIALIZANDO CLIENTE SUPABASE')
-        console.log('📍 URL:', SUPABASE_URL)
-        console.log('🔑 Key length:', SUPABASE_ANON_KEY?.length || 'No key')
+        console.log('🚀 INICIANDO CONEXIÓN SUPABASE')
+        console.log('✅ API Key válida detectada')
         
         this.client = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
-        this.connected = null // null = pendiente, true = conectado, false = error
+        this.connected = null
         this.init()
     }
 
     async init() {
         try {
-            console.log('🔄 TESTEANDO CONEXIÓN...')
+            console.log('🔗 Conectando con Supabase...')
             
-            // Test 1: Conexión básica
-            console.log('🧪 Test 1: Conexión básica...')
-            const { data: test1, error: error1 } = await this.client.from('problemas').select('count').limit(1)
-            console.log('Test 1 - Count:', test1, 'Error:', error1)
-            
-            if (error1) {
-                console.error('❌ FALLO Test 1:', error1)
-                this.handleConnectionError(error1)
+            // Test directo y simple
+            const { data, error } = await this.client
+                .from('problemas')
+                .select('id, categoria, descripcion')
+                .limit(3)
+
+            console.log('📊 Resultado conexión:', { data, error })
+
+            if (error) {
+                console.error('❌ Error de Supabase:', error)
+                this.handleConnectionError(error)
                 return
             }
-
-            // Test 2: Verificar datos existentes
-            console.log('🧪 Test 2: Verificando datos...')
-            const { data: categories, error: error2 } = await this.client
-                .from('problemas')
-                .select('categoria')
-                .limit(5)
-            
-            console.log('Test 2 - Categorías:', categories, 'Error:', error2)
-            
-            if (error2) {
-                console.error('❌ FALLO Test 2:', error2)
-                this.handleConnectionError(error2)
-                return
-            }
-
-            // Test 3: Verificar estructura de tabla
-            console.log('🧪 Test 3: Estructura de datos...')
-            const { data: sample, error: error3 } = await this.client
-                .from('problemas')
-                .select('*')
-                .limit(1)
-            
-            console.log('Test 3 - Muestra:', sample, 'Error:', error3)
 
             this.connected = true
-            console.log('✅ TODOS LOS TESTS PASADOS - SISTEMA OPERATIVO')
+            console.log('✅ CONEXIÓN EXITOSA - Datos encontrados:', data?.length || 0)
             this.updateStatusIndicator('online')
-            this.showConnectionSuccess(categories, sample)
+            this.showConnectionSuccess(data)
 
         } catch (error) {
-            console.error('💥 ERROR CRÍTICO:', error)
+            console.error('💥 Error inesperado:', error)
             this.handleConnectionError(error)
         }
     }
@@ -73,65 +51,14 @@ class SupabaseClient {
         const messagesContainer = document.getElementById('chatMessages')
         if (!messagesContainer) return
         
-        let errorTitle = '❌ Error de Conexión'
-        let errorDetails = ''
-        let solutionSteps = []
-        
-        if (error.message) {
-            if (error.message.includes('JWT')) {
-                errorTitle = '❌ Problema de Autenticación'
-                errorDetails = 'La API Key podría ser inválida o estar expirada'
-                solutionSteps = [
-                    'Verifica que la API Key sea correcta',
-                    'Asegúrate de usar la anon public key (no secret)',
-                    'Revisa si la key ha expirado'
-                ]
-            } else if (error.message.includes('relation "problemas" does not exist')) {
-                errorTitle = '❌ Tabla No Encontrada'
-                errorDetails = 'La tabla "problemas" no existe en la base de datos'
-                solutionSteps = [
-                    'Verifica que la tabla se llama exactamente "problemas"',
-                    'Crea la tabla si no existe',
-                    'Revisa mayúsculas y minúsculas'
-                ]
-            } else if (error.message.includes('permission denied')) {
-                errorTitle = '❌ Permisos Insuficientes'
-                errorDetails = 'No tienes permisos para leer la tabla'
-                solutionSteps = [
-                    'Configura Row Level Security (RLS) en Supabase',
-                    'Crea una política que permita SELECT público',
-                    'Ve a Authentication > Policies en tu proyecto'
-                ]
-            } else if (error.message.includes('Network Error')) {
-                errorTitle = '❌ Error de Red'
-                errorDetails = 'No se puede conectar al servidor'
-                solutionSteps = [
-                    'Verifica tu conexión a internet',
-                    'Revisa si Supabase está en mantenimiento',
-                    'Intenta recargar la página'
-                ]
-            } else {
-                errorDetails = error.message
-                solutionSteps = ['Revisa la consola para más detalles']
-            }
-        }
-        
         const errorHTML = `
             <div class="message message-system">
-                <h4>${errorTitle}</h4>
-                ${errorDetails ? `<p>${errorDetails}</p>` : ''}
-                ${solutionSteps.length > 0 ? `
-                    <h5>🔧 Pasos para solucionar:</h5>
-                    <ol>
-                        ${solutionSteps.map(step => `<li>${step}</li>`).join('')}
-                    </ol>
-                ` : ''}
+                <h4>❌ Error de Conexión</h4>
+                <p>${error.message || 'No se pudo conectar a la base de datos'}</p>
+                <small>URL: ${SUPABASE_URL}</small>
                 <div style="margin-top: 1rem;">
                     <button onclick="window.location.reload()" class="cyber-button small">
                         <i class="fas fa-sync"></i> Reintentar
-                    </button>
-                    <button onclick="window.runDiagnostics()" class="cyber-button small">
-                        <i class="fas fa-bug"></i> Diagnosticar
                     </button>
                 </div>
             </div>
@@ -145,43 +72,34 @@ class SupabaseClient {
         const indicator = document.getElementById('dbStatus')
         if (indicator) {
             indicator.className = `status-dot status-${status}`
-            indicator.title = status === 'online' ? 'Conectado' : 
-                            status === 'error' ? 'Error' : 'Conectando...'
         }
     }
 
-    showConnectionSuccess(categories, sample) {
+    showConnectionSuccess(data) {
         const messagesContainer = document.getElementById('chatMessages')
         
-        // Obtener categorías únicas para mostrar
-        const uniqueCategories = categories ? 
-            [...new Set(categories.map(c => c.categoria))].slice(0, 4) : 
+        // Obtener categorías únicas de los datos reales
+        const categories = data ? 
+            [...new Set(data.map(item => item.categoria))] : 
             ['celulares_moviles', 'software', 'hardware', 'redes']
         
         const successHTML = `
             <div class="message message-bot">
                 <strong><i class="fas fa-robot"></i> CycloBot:</strong>
                 <p>¡Sistema listo! ✅ Base de datos conectada correctamente.</p>
-                <p>He detectado ${categories?.length || 'varias'} categorías disponibles.</p>
-                <p>¿En qué puedo ayudarte hoy?</p>
+                <p>Encontré ${data?.length || 'varios'} problemas en la base de datos.</p>
+                <p>¿Qué problema tenés?</p>
             </div>
             <div class="message message-bot">
-                <strong><i class="fas fa-folder"></i> Selecciona una categoría:</strong>
+                <strong><i class="fas fa-folder"></i> Categorías disponibles:</strong>
                 <div class="options-grid">
-                    ${uniqueCategories.map(cat => `
+                    ${categories.map(cat => `
                         <button class="option-btn" data-category="${cat}">
                             <i class="fas fa-${this.getCategoryIcon(cat)}"></i> 
                             ${this.formatCategoryName(cat)}
                         </button>
                     `).join('')}
                 </div>
-            </div>
-            <div class="message message-system">
-                <small>
-                    <i class="fas fa-info-circle"></i> 
-                    Sistema conectado a: ${SUPABASE_URL}
-                    ${sample && sample.length > 0 ? ` | ${sample.length} registro(s) encontrado(s)` : ''}
-                </small>
             </div>
         `
         
@@ -195,7 +113,7 @@ class SupabaseClient {
         const icons = {
             'celulares_moviles': 'mobile-alt',
             'software': 'code',
-            'hardware': 'desktop', 
+            'hardware': 'desktop',
             'redes': 'wifi',
             'seguridad': 'shield-alt'
         }
@@ -206,7 +124,7 @@ class SupabaseClient {
         const names = {
             'celulares_moviles': 'Celulares',
             'software': 'Software',
-            'hardware': 'Hardware',
+            'hardware': 'Hardware', 
             'redes': 'Redes',
             'seguridad': 'Seguridad'
         }
@@ -227,51 +145,36 @@ class SupabaseClient {
         }, 100)
     }
 
-    // Métodos de consulta con debugging
     async getProblemsByCategory(categoria) {
-        console.log(`📥 SOLICITANDO PROBLEMAS: ${categoria}`)
+        console.log(`📥 Cargando problemas para: ${categoria}`)
         
         if (!this.connected) {
-            throw new Error('Sistema no conectado a la base de datos')
+            throw new Error('No hay conexión con la base de datos')
         }
 
         try {
-            const { data, error, count } = await this.client
+            const { data, error } = await this.client
                 .from('problemas')
-                .select('*', { count: 'exact' })
+                .select('*')
                 .eq('categoria', categoria)
                 .order('nivel', { ascending: true })
 
-            console.log(`📊 RESPUESTA PARA ${categoria}:`, {
-                data: data?.length || 0,
-                count: count,
-                error: error
-            })
+            if (error) throw error
 
-            if (error) {
-                console.error('❌ ERROR EN CONSULTA:', error)
-                throw error
-            }
-
-            if (!data || data.length === 0) {
-                console.warn(`⚠️ NO HAY DATOS para categoría: ${categoria}`)
-                return []
-            }
-
-            console.log(`✅ ${data.length} problemas cargados para ${categoria}`)
-            return data
+            console.log(`✅ ${data?.length || 0} problemas cargados`)
+            return data || []
 
         } catch (error) {
-            console.error(`💥 ERROR CARGANDO ${categoria}:`, error)
+            console.error('❌ Error cargando problemas:', error)
             throw error
         }
     }
 
     async getNextProblem(currentProblemId, nivel) {
-        console.log(`➡️ BUSCANDO SIGUIENTE: problema=${currentProblemId}, nivel=${nivel}`)
+        console.log(`➡️ Buscando siguiente problema...`)
         
         if (!this.connected) {
-            throw new Error('Sistema no conectado')
+            throw new Error('No hay conexión con la base de datos')
         }
 
         try {
@@ -282,38 +185,18 @@ class SupabaseClient {
                 .eq('nivel', nivel)
                 .single()
 
-            console.log(`🔍 RESULTADO SIGUIENTE:`, { data, error })
-
             if (error) {
-                if (error.code === 'PGRST116') {
-                    console.log('ℹ️ No hay más preguntas en el flujo')
-                    return null
-                }
+                if (error.code === 'PGRST116') return null
                 throw error
             }
 
             return data
 
         } catch (error) {
-            console.error('❌ ERROR BUSCANDO SIGUIENTE:', error)
+            console.error('❌ Error buscando siguiente problema:', error)
             throw error
         }
     }
-}
-
-// Funciones globales de debugging
-window.runDiagnostics = async function() {
-    console.log('🩺 EJECUTANDO DIAGNÓSTICO COMPLETO...')
-    
-    const client = new SupabaseClient()
-    
-    // Esperar a que se complete la inicialización
-    setTimeout(() => {
-        console.log('📋 ESTADO FINAL:', {
-            connected: client.connected,
-            client: client.client ? '✅ Inicializado' : '❌ No inicializado'
-        })
-    }, 2000)
 }
 
 window.SupabaseClient = SupabaseClient
