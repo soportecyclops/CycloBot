@@ -1,11 +1,9 @@
-// CYCLOPSBOT - Cliente Supabase
-console.log('🚀 Inicializando cliente Supabase...');
+// CYCLOPSBOT - Cliente Supabase MEJORADO
+console.log('🚀 Inicializando cliente Supabase mejorado...');
 
-// Configuración de Supabase
 const SUPABASE_URL = 'https://nmpvbcfbrhtcfyovjzul.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5tcHZiY2Zicmh0Y2Z5b3ZqenVsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMwMjQ0NjAsImV4cCI6MjA3ODYwMDQ2MH0.9-FalpRfqQmD_72ZDbVnBbN7EU7lwgzsX2zNWz8er_4';
 
-// Inicializar cliente Supabase
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // Verificar conexión
@@ -52,8 +50,7 @@ async function obtenerCategorias() {
         
     } catch (error) {
         console.error('❌ Error obteniendo categorías:', error);
-        // Fallback a categorías predefinidas
-        return ['internet', 'celulares_moviles', 'software', 'hardware'];
+        return ['internet', 'software', 'hardware', 'movil', 'seguridad_digital'];
     }
 }
 
@@ -66,12 +63,27 @@ async function obtenerProblemasPorCategoria(categoria) {
             .from('problemas')
             .select('*')
             .eq('categoria', categoria)
-            .order('nivel');
+            .order('nivel')
+            .limit(20);
 
         if (error) throw error;
 
         console.log(`✅ ${data.length} problemas encontrados para ${categoria}`);
-        return data;
+        
+        // Procesar datos para asegurar estructura correcta
+        return data.map(problema => ({
+            ...problema,
+            // Asegurar que preguntas sea un array
+            preguntas: Array.isArray(problema.preguntas) ? problema.preguntas : 
+                      problema.preguntas ? [problema.preguntas] : ['¿Podrías describir el problema?'],
+            // Asegurar que respuestas_posibles sea un array
+            respuestas_posibles: Array.isArray(problema.respuestas_posibles) ? problema.respuestas_posibles : 
+                               problema.respuestas_posibles ? [problema.respuestas_posibles] : 
+                               ['Sí', 'No', 'No lo sé'],
+            // Valores por defecto
+            tipo_pregunta: problema.tipo_pregunta || 'opciones',
+            nivel: problema.nivel || 1
+        }));
         
     } catch (error) {
         console.error(`❌ Error obteniendo problemas para ${categoria}:`, error);
@@ -97,7 +109,21 @@ async function obtenerSiguientePregunta(categoria, preguntaAnteriorId = null) {
 
         if (error) throw error;
 
-        return data && data.length > 0 ? data[0] : null;
+        if (data && data.length > 0) {
+            const pregunta = data[0];
+            // Procesar la pregunta para asegurar estructura correcta
+            return {
+                ...pregunta,
+                preguntas: Array.isArray(pregunta.preguntas) ? pregunta.preguntas : 
+                          pregunta.preguntas ? [pregunta.preguntas] : ['¿Podrías describir el problema?'],
+                respuestas_posibles: Array.isArray(pregunta.respuestas_posibles) ? pregunta.respuestas_posibles : 
+                                   pregunta.respuestas_posibles ? [pregunta.respuestas_posibles] : 
+                                   ['Sí', 'No', 'No lo sé'],
+                tipo_pregunta: pregunta.tipo_pregunta || 'opciones'
+            };
+        }
+        
+        return null;
         
     } catch (error) {
         console.error('❌ Error obteniendo siguiente pregunta:', error);
@@ -118,11 +144,38 @@ async function obtenerDiagnosticoFinal(categoria, respuestasUsuario) {
 
         if (error) throw error;
 
-        return data && data.length > 0 ? data[0] : null;
+        if (data && data.length > 0) {
+            const diagnostico = data[0];
+            return {
+                ...diagnostico,
+                // Asegurar que soluciones sea un array
+                soluciones: Array.isArray(diagnostico.soluciones) ? diagnostico.soluciones : 
+                           diagnostico.soluciones ? [diagnostico.soluciones] : []
+            };
+        }
+        
+        return null;
         
     } catch (error) {
         console.error('❌ Error obteniendo diagnóstico final:', error);
         return null;
+    }
+}
+
+// Obtener estadísticas de problemas
+async function obtenerEstadisticasProblemas() {
+    try {
+        const { data, error } = await supabase
+            .from('problemas')
+            .select('id', { count: 'exact' });
+
+        if (error) throw error;
+
+        return data ? data.length : 0;
+        
+    } catch (error) {
+        console.error('❌ Error obteniendo estadísticas:', error);
+        return 0;
     }
 }
 
@@ -133,7 +186,8 @@ window.SupabaseClient = {
     obtenerProblemasPorCategoria,
     obtenerSiguientePregunta,
     obtenerDiagnosticoFinal,
+    obtenerEstadisticasProblemas,
     supabase
 };
 
-console.log('✅ Cliente Supabase inicializado y listo');
+console.log('✅ Cliente Supabase mejorado inicializado y listo');
