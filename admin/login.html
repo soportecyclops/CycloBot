@@ -3,47 +3,86 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CycloBot - Acceso Administración</title>
-    <link rel="stylesheet" href="../public/css/auth.css">
-    <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;500;600;700&family=Orbitron:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>Admin Login - CycloBot</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../public/css/styles.css">
+    <style>
+        .admin-login-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            padding: 20px;
+        }
+        
+        .admin-login-card {
+            background: rgba(30, 41, 59, 0.95);
+            border: 2px solid #3b82f6;
+            border-radius: 15px;
+            padding: 40px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 0 30px rgba(59, 130, 246, 0.3);
+            backdrop-filter: blur(10px);
+        }
+        
+        .admin-login-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .admin-login-header h1 {
+            color: #3b82f6;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+        
+        .admin-login-header p {
+            color: #94a3b8;
+            font-size: 0.9rem;
+        }
+    </style>
 </head>
 <body>
-    <div class="auth-container">
-        <div class="auth-card">
-            <div class="auth-header">
-                <h1>?? CYCLOPSBOT</h1>
-                <p>PANEL DE ADMINISTRACIÓN</p>
+    <div class="admin-login-container">
+        <div class="admin-login-card cyber-card">
+            <div class="admin-login-header">
+                <h1><i class="fas fa-shield-alt"></i> CYCLOPSBOT ADMIN</h1>
+                <p>Acceso administrativo al sistema</p>
             </div>
-
-            <form id="adminLoginForm" class="auth-form">
+            
+            <form id="adminLoginForm" class="login-form">
                 <div class="form-group">
-                    <label for="adminUsername">
-                        <i class="fas fa-user"></i> Usuario Administrador
-                    </label>
-                    <input type="text" id="adminUsername" required placeholder="admin">
+                    <label for="adminUsername"><i class="fas fa-user"></i> Usuario Administrador</label>
+                    <input type="text" id="adminUsername" placeholder="Ingresa tu usuario" required>
                 </div>
-
+                
                 <div class="form-group">
-                    <label for="adminPassword">
-                        <i class="fas fa-lock"></i> Contraseña
-                    </label>
-                    <input type="password" id="adminPassword" required placeholder="••••••••">
+                    <label for="adminPassword"><i class="fas fa-lock"></i> ContraseÃ±a</label>
+                    <input type="password" id="adminPassword" placeholder="Ingresa tu contraseÃ±a" required>
                 </div>
-
-                <button type="submit" class="auth-btn">
-                    <i class="fas fa-shield-alt"></i> Acceder al Panel
+                
+                <button type="submit" class="cyber-button large" style="width: 100%;">
+                    <i class="fas fa-sign-in-alt"></i> Acceder al Panel
                 </button>
             </form>
-
-            <div class="auth-footer">
-                <p>¿Eres usuario normal? El bot principal está disponible para todos.</p>
-                <a href="../index.html" class="back-link">
-                    <i class="fas fa-arrow-left"></i> Volver al CycloBot Principal
+            
+            <div class="login-info" style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #334155;">
+                <h4><i class="fas fa-info-circle"></i> Credenciales</h4>
+                <div class="credentials">
+                    <p><strong>Usuario:</strong> admin</p>
+                    <p><strong>ContraseÃ±a:</strong> S0p0rt35</p>
+                </div>
+            </div>
+            
+            <div style="text-align: center; margin-top: 20px;">
+                <a href="../index.html" class="cyber-button small">
+                    <i class="fas fa-arrow-left"></i> Volver al Inicio
                 </a>
             </div>
-
-            <div id="authMessage" class="auth-message"></div>
         </div>
     </div>
 
