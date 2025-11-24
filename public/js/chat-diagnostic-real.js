@@ -1,535 +1,595 @@
-// CYCLOPSBOT v3.1 - Motor de Diagnóstico Inteligente
-// Sistema Akinator-style completamente funcional
-
-class DiagnosticChat {
+// CYCLOPSBOT - Motor de Diagnóstico Inteligente con Supabase
+class CyclopsBotReal {
     constructor() {
+        this.currentCategory = null;
         this.currentQuestion = null;
         this.questionHistory = [];
-        this.currentCategory = null;
-        this.userResponses = [];
-        this.diagnosticState = 'category_selection'; // category_selection, in_progress, completed
-        this.possibleProblems = [];
+        this.userAnswers = [];
+        this.diagnosisActive = false;
+        this.sessionId = this.generateSessionId();
+        this.diagnosticsCount = 0;
+        this.problemsCount = 0;
         
+        // Estados del sistema
+        this.systemStatus = {
+            supabase: 'conectando',
+            ai: 'inactivo',
+            online: 'verificando'
+        };
+
         this.init();
     }
 
     async init() {
-        console.log('🚀 Inicializando Motor de Diagnóstico v3.1');
+        console.log('🚀 Inicializando CyclopsBot Real...');
+        await this.verificarSistema();
         this.setupEventListeners();
-        await this.showWelcomeMessage();
+        this.mostrarInterfazInicial();
+    }
+
+    async verificarSistema() {
+        // Verificar conexión a Supabase
+        const conexion = await window.SupabaseClient.verificarConexionSupabase();
+        
+        if (conexion.success) {
+            this.systemStatus.supabase = 'conectado';
+            this.actualizarEstadoSistema();
+            console.log('✅ Sistema verificado - Supabase conectado');
+        } else {
+            this.systemStatus.supabase = 'error';
+            this.actualizarEstadoSistema();
+            console.error('❌ Error en conexión Supabase');
+        }
+    }
+
+    actualizarEstadoSistema() {
+        const statusItems = document.querySelectorAll('.status-item');
+        
+        statusItems.forEach(item => {
+            const icon = item.querySelector('i');
+            const text = item.querySelector('span');
+            
+            if (text.textContent === 'BD') {
+                if (this.systemStatus.supabase === 'conectado') {
+                    item.classList.add('online');
+                    icon.style.color = 'var(--success)';
+                } else if (this.systemStatus.supabase === 'error') {
+                    item.classList.remove('online');
+                    icon.style.color = 'var(--danger)';
+                }
+            }
+        });
     }
 
     setupEventListeners() {
-        // Los eventos se manejan a través del script principal
-        console.log('✅ Event listeners configurados');
+        // Configurar botones de acción rápida
+        document.querySelectorAll('[data-action]').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const action = e.target.closest('[data-action]').dataset.action;
+                this.handleQuickAction(action);
+            });
+        });
     }
 
-    async showWelcomeMessage() {
-        const messagesContainer = document.getElementById('messages-container');
-        const responsesContainer = document.getElementById('responses-container');
+    async mostrarInterfazInicial() {
+        this.limpiarChat();
+        this.limpiarBotones();
         
-        // Limpiar contenedores
-        messagesContainer.innerHTML = '';
-        responsesContainer.innerHTML = '';
+        // Mensaje de bienvenida
+        this.addMessage('bot', `
+            <div class="action-call">
+                <h3>🔍 SISTEMA DE DIAGNÓSTICO INTELIGENTE</h3>
+                <p>Selecciona una categoría para comenzar el análisis</p>
+            </div>
+        `);
 
-        // Mostrar mensaje de bienvenida
-        this.addMessage('CycloBot', '¡Sistema listo! Base de datos conectada.', 'bot');
-        this.addMessage('CycloBot', '¿En qué puedo ayudarte?', 'bot');
-        
-        // Cargar y mostrar categorías
-        await this.loadAndDisplayCategories();
+        // Cargar categorías desde Supabase
+        await this.mostrarCategoriasReales();
     }
 
-    async loadAndDisplayCategories() {
+    async mostrarCategoriasReales() {
         try {
-            showLoading('Cargando categorías...');
+            const categorias = await window.SupabaseClient.obtenerCategorias();
+            this.mostrarBotonesCategoria(categorias);
             
-            const { data: categories, error } = await supabase
-                .from('problemas')
-                .select('categoria')
-                .not('categoria', 'is', null);
-
-            if (error) throw error;
-
-            // Obtener categorías únicas
-            const uniqueCategories = [...new Set(categories.map(item => item.categoria))];
-            
-            this.displayCategories(uniqueCategories);
-            hideLoading();
+            // Actualizar contador de problemas
+            await this.actualizarContadorProblemas();
             
         } catch (error) {
             console.error('Error cargando categorías:', error);
-            this.addMessage('CycloBot', '❌ Error cargando categorías. Intentando recuperar...', 'bot');
-            hideLoading();
-            
             // Fallback a categorías predefinidas
-            const fallbackCategories = ['internet', 'celulares_moviles', 'software', 'hardware'];
-            this.displayCategories(fallbackCategories);
+            const categoriasFallback = ['internet', 'celulares_moviles', 'software', 'hardware'];
+            this.mostrarBotonesCategoria(categoriasFallback);
         }
     }
 
-    displayCategories(categories) {
-        const responsesContainer = document.getElementById('responses-container');
-        responsesContainer.innerHTML = '';
-
-        // Título de categorías
-        const title = document.createElement('div');
-        title.className = 'response-section-title';
-        title.innerHTML = '<i class="fas fa-folder-open"></i> Selecciona una categoría:';
-        responsesContainer.appendChild(title);
-
-        // Botones de categorías
-        categories.forEach(category => {
-            const button = document.createElement('button');
-            button.className = 'cyber-response-button category-button';
-            button.innerHTML = `
-                <i class="fas fa-folder"></i>
-                ${this.formatCategoryName(category)}
-            `;
-            button.onclick = () => this.startDiagnosticForCategory(category);
-            responsesContainer.appendChild(button);
+    mostrarBotonesCategoria(categorias) {
+        this.limpiarBotones();
+        
+        const botonesArea = document.getElementById('botonesArea');
+        const gridContainer = document.createElement('div');
+        gridContainer.className = 'botones-grid';
+        
+        categorias.forEach(categoria => {
+            const boton = this.crearBotonCategoria(categoria, () => {
+                this.seleccionarCategoria(categoria);
+            });
+            gridContainer.appendChild(boton);
         });
-
-        // Actualizar sidebar
-        this.updateCategoriesSidebar(categories);
+        
+        botonesArea.appendChild(gridContainer);
     }
 
-    updateCategoriesSidebar(categories) {
-        const categoriesList = document.getElementById('categories-list');
-        categoriesList.innerHTML = '';
-
-        categories.forEach(category => {
-            const categoryElement = document.createElement('div');
-            categoryElement.className = 'category-sidebar-item';
-            categoryElement.innerHTML = `
-                <i class="fas fa-folder"></i>
-                <span>${this.formatCategoryName(category)}</span>
-            `;
-            categoryElement.onclick = () => this.startDiagnosticForCategory(category);
-            categoriesList.appendChild(categoryElement);
-        });
+    crearBotonCategoria(categoria, onClick) {
+        const boton = document.createElement('button');
+        boton.className = 'cyber-btn primary boton-categoria';
+        
+        const icono = this.obtenerIconoCategoria(categoria);
+        const nombre = this.formatearNombreCategoria(categoria);
+        
+        boton.innerHTML = `${icono} ${nombre}`;
+        boton.addEventListener('click', onClick);
+        
+        return boton;
     }
 
-    formatCategoryName(category) {
-        return category.split('_')
-            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    obtenerIconoCategoria(categoria) {
+        const iconos = {
+            'internet': '🌐',
+            'celulares_moviles': '📱',
+            'software': '💻',
+            'hardware': '🔧',
+            'redes': '📡',
+            'seguridad': '🛡️'
+        };
+        return iconos[categoria] || '🔍';
+    }
+
+    formatearNombreCategoria(categoria) {
+        return categoria.split('_')
+            .map(palabra => palabra.charAt(0).toUpperCase() + palabra.slice(1))
             .join(' ');
     }
 
-    async startDiagnosticForCategory(category) {
-        this.currentCategory = category;
-        this.diagnosticState = 'in_progress';
+    async seleccionarCategoria(categoria) {
+        this.currentCategory = categoria;
         this.questionHistory = [];
-        this.userResponses = [];
-
-        this.addMessage('Tú', `Problema de: ${this.formatCategoryName(category)}`, 'user');
+        this.userAnswers = [];
+        this.diagnosisActive = true;
         
-        await this.loadFirstQuestion(category);
+        this.addMessage('user', `📂 ${this.obtenerIconoCategoria(categoria)} ${this.formatearNombreCategoria(categoria)}`);
+        
+        // Obtener primera pregunta desde Supabase
+        await this.obtenerYMostrarSiguientePregunta();
     }
 
-    async loadFirstQuestion(category) {
+    async obtenerYMostrarSiguientePregunta(preguntaAnteriorId = null) {
         try {
-            showLoading('Buscando problemas...');
+            this.mostrarCargando('Buscando diagnóstico...');
             
-            const { data: problems, error } = await supabase
-                .from('problemas')
-                .select('*')
-                .eq('categoria', category)
-                .eq('nivel', 1)
-                .order('id');
+            const pregunta = await window.SupabaseClient.obtenerSiguientePregunta(
+                this.currentCategory, 
+                preguntaAnteriorId
+            );
 
-            if (error) throw error;
-
-            this.possibleProblems = problems;
-            
-            this.addMessage('CycloBot', `🔍 Buscando soluciones...`, 'bot');
-            this.addMessage('CycloBot', `✅ ${problems.length} problemas encontrados`, 'bot');
-
-            if (problems.length > 0) {
-                // Seleccionar pregunta inicial más común
-                const firstQuestion = problems[0];
-                await this.displayQuestion(firstQuestion);
-            } else {
-                this.addMessage('CycloBot', '❌ No se encontraron problemas para esta categoría.', 'bot');
-                this.showRestartOption();
-            }
-            
-            hideLoading();
-            
-        } catch (error) {
-            console.error('Error cargando primera pregunta:', error);
-            this.addMessage('CycloBot', '❌ Error cargando problemas. Intenta nuevamente.', 'bot');
-            hideLoading();
-            this.showRestartOption();
-        }
-    }
-
-    async displayQuestion(question) {
-        this.currentQuestion = question;
-        this.questionHistory.push(question);
-
-        // Mostrar la pregunta
-        this.addMessage('CycloBot', question.preguntas[0], 'bot');
-
-        // Mostrar opciones de respuesta
-        this.displayResponseOptions(question);
-        
-        // Mostrar controles de navegación
-        this.showNavigationControls();
-    }
-
-    displayResponseOptions(question) {
-        const responsesContainer = document.getElementById('responses-container');
-        responsesContainer.innerHTML = '';
-
-        // Mostrar tipo de pregunta
-        const typeIndicator = document.createElement('div');
-        typeIndicator.className = 'question-type-indicator';
-        
-        let typeText = '';
-        let icon = '';
-        
-        switch(question.tipo_pregunta) {
-            case 'booleano':
-                typeText = 'Responde Sí o No';
-                icon = 'fa-toggle-on';
-                break;
-            case 'multiple':
-                typeText = 'Selección múltiple';
-                icon = 'fa-list-check';
-                break;
-            default:
-                typeText = 'Selecciona una opción';
-                icon = 'fa-mouse-pointer';
-        }
-        
-        typeIndicator.innerHTML = `<i class="fas ${icon}"></i> ${typeText}`;
-        responsesContainer.appendChild(typeIndicator);
-
-        // Mostrar opciones de respuesta
-        question.respuestas_posibles.forEach((respuesta, index) => {
-            const button = document.createElement('button');
-            button.className = 'cyber-response-button';
-            
-            // Icono basado en el tipo de respuesta
-            let icon = 'fa-circle';
-            if (question.tipo_pregunta === 'booleano') {
-                icon = respuesta.toLowerCase().includes('sí') || respuesta.toLowerCase().includes('si') ? 
-                       'fa-check-circle' : 'fa-times-circle';
-            }
-            
-            button.innerHTML = `
-                <i class="fas ${icon}"></i>
-                <span>${respuesta}</span>
-            `;
-            
-            button.onclick = () => this.handleResponse(respuesta, question);
-            responsesContainer.appendChild(button);
-        });
-    }
-
-    async handleResponse(response, question) {
-        // Guardar respuesta del usuario
-        this.userResponses.push({
-            question: question.preguntas[0],
-            response: response,
-            questionId: question.id
-        });
-
-        // Mostrar respuesta del usuario
-        this.addMessage('Tú', response, 'user');
-
-        // Buscar siguiente pregunta o diagnóstico
-        await this.findNextStep(question, response);
-    }
-
-    async findNextStep(currentQuestion, userResponse) {
-        try {
-            showLoading('Analizando respuesta...');
-
-            if (currentQuestion.es_pregunta_final) {
-                // Llegamos a un diagnóstico final
-                await this.showDiagnosis(currentQuestion);
+            if (!pregunta) {
+                // No hay más preguntas, mostrar diagnóstico final
+                await this.mostrarDiagnosticoFinal();
                 return;
             }
 
-            // Buscar siguiente pregunta basada en la respuesta
-            const { data: nextQuestions, error } = await supabase
-                .from('problemas')
-                .select('*')
-                .eq('categoria', this.currentCategory)
-                .eq('pregunta_anterior_id', currentQuestion.id)
-                .order('nivel');
-
-            if (error) throw error;
-
-            if (nextQuestions && nextQuestions.length > 0) {
-                // Mostrar siguiente pregunta
-                const nextQuestion = nextQuestions[0];
-                setTimeout(() => {
-                    this.displayQuestion(nextQuestion);
-                    hideLoading();
-                }, 1000);
-            } else {
-                // No hay más preguntas, mostrar diagnóstico basado en respuestas
-                await this.findBestDiagnosis();
-                hideLoading();
-            }
-
-        } catch (error) {
-            console.error('Error buscando siguiente paso:', error);
-            this.addMessage('CycloBot', '❌ Error procesando respuesta.', 'bot');
-            hideLoading();
-            this.showRestartOption();
-        }
-    }
-
-    async findBestDiagnosis() {
-        try {
-            // Buscar problemas que coincidan con las respuestas
-            const { data: possibleDiagnoses, error } = await supabase
-                .from('problemas')
-                .select('*')
-                .eq('categoria', this.currentCategory)
-                .eq('es_pregunta_final', true);
-
-            if (error) throw error;
-
-            if (possibleDiagnoses && possibleDiagnoses.length > 0) {
-                // Seleccionar el diagnóstico más probable (por ahora el primero)
-                const diagnosis = possibleDiagnoses[0];
-                await this.showDiagnosis(diagnosis);
-            } else {
-                this.addMessage('CycloBot', '🔍 No se pudo determinar un diagnóstico específico.', 'bot');
-                this.showGeneralSolutions();
-            }
-
-        } catch (error) {
-            console.error('Error buscando diagnóstico:', error);
-            this.showGeneralSolutions();
-        }
-    }
-
-    async showDiagnosis(diagnosis) {
-        this.diagnosticState = 'completed';
-
-        // Mostrar causa probable
-        if (diagnosis.causa_probable) {
-            this.addMessage('CycloBot', `🎯 **Causa Probable:** ${diagnosis.causa_probable}`, 'bot');
-        }
-
-        // Mostrar soluciones
-        if (diagnosis.soluciones && diagnosis.soluciones.length > 0) {
-            this.addMessage('CycloBot', '🛠️ **Soluciones Recomendadas:**', 'bot');
+            this.currentQuestion = pregunta;
+            this.questionHistory.push(pregunta);
             
-            diagnosis.soluciones.forEach((solucion, index) => {
-                this.addMessage('CycloBot', `${index + 1}. ${solucion}`, 'bot');
-            });
+            // Mostrar pregunta al usuario
+            this.addMessage('bot', `❓ **${pregunta.preguntas[0]}**`);
+            
+            // Mostrar opciones de respuesta
+            this.mostrarOpcionesRespuesta(pregunta);
+            
+            this.ocultarCargando();
+            
+        } catch (error) {
+            console.error('Error obteniendo pregunta:', error);
+            this.addMessage('bot', '❌ Error cargando la siguiente pregunta. Intenta nuevamente.');
+            this.ocultarCargando();
+            this.mostrarOpcionesRecuperacion();
         }
-
-        // Preguntar si fue útil
-        setTimeout(() => {
-            this.askForFeedback();
-        }, 1500);
     }
 
-    showGeneralSolutions() {
-        this.addMessage('CycloBot', '💡 **Soluciones Generales:**', 'bot');
-        this.addMessage('CycloBot', '1. Reinicia el dispositivo', 'bot');
-        this.addMessage('CycloBot', '2. Verifica las conexiones', 'bot');
-        this.addMessage('CycloBot', '3. Actualiza el software', 'bot');
-        this.addMessage('CycloBot', '4. Consulta con un técnico especializado', 'bot');
+    mostrarOpcionesRespuesta(pregunta) {
+        this.limpiarBotones();
         
-        this.askForFeedback();
-    }
+        const botonesArea = document.getElementById('botonesArea');
+        const gridContainer = document.createElement('div');
+        gridContainer.className = 'botones-grid';
+        
+        // Mostrar tipo de pregunta
+        const tipoIndicator = document.createElement('div');
+        tipoIndicator.style.gridColumn = '1 / -1';
+        tipoIndicator.style.textAlign = 'center';
+        tipoIndicator.style.fontSize = '0.7rem';
+        tipoIndicator.style.color = 'var(--text-muted)';
+        tipoIndicator.style.marginBottom = '5px';
+        tipoIndicator.innerHTML = `💬 ${this.obtenerTextoTipoPregunta(pregunta.tipo_pregunta)}`;
+        gridContainer.appendChild(tipoIndicator);
 
-    askForFeedback() {
-        const responsesContainer = document.getElementById('responses-container');
-        responsesContainer.innerHTML = '';
-
-        const feedbackTitle = document.createElement('div');
-        feedbackTitle.className = 'response-section-title';
-        feedbackTitle.innerHTML = '<i class="fas fa-star"></i> ¿Fue útil el diagnóstico?';
-        responsesContainer.appendChild(feedbackTitle);
-
-        const feedbackButtons = [
-            { text: 'Sí, muy útil', icon: 'fa-face-laugh-beam', value: 'useful' },
-            { text: 'Más o menos', icon: 'fa-face-meh', value: 'neutral' },
-            { text: 'No fue útil', icon: 'fa-face-frown', value: 'not_useful' }
-        ];
-
-        feedbackButtons.forEach(feedback => {
-            const button = document.createElement('button');
-            button.className = 'cyber-response-button feedback-button';
-            button.innerHTML = `
-                <i class="fas ${feedback.icon}"></i>
-                <span>${feedback.text}</span>
-            `;
-            button.onclick = () => this.handleFeedback(feedback.value);
-            responsesContainer.appendChild(button);
+        // Crear botones para cada opción de respuesta
+        pregunta.respuestas_posibles.forEach((respuesta, index) => {
+            const boton = this.crearBotonRespuesta(respuesta, index, () => {
+                this.procesarRespuestaUsuario(respuesta, pregunta);
+            });
+            gridContainer.appendChild(boton);
         });
 
-        // Opción para nuevo diagnóstico
-        const restartButton = document.createElement('button');
-        restartButton.className = 'cyber-response-button restart-button';
-        restartButton.innerHTML = `
-            <i class="fas fa-rotate-right"></i>
-            <span>Realizar nuevo diagnóstico</span>
-        `;
-        restartButton.onclick = () => this.restartDiagnostic();
-        responsesContainer.appendChild(restButton);
+        botonesArea.appendChild(gridContainer);
+
+        // Agregar botón para volver atrás si hay historial
+        if (this.questionHistory.length > 1) {
+            const volverBoton = this.crearBotonVolver();
+            botonesArea.appendChild(volverBoton);
+        }
     }
 
-    handleFeedback(feedback) {
-        this.addMessage('Tú', 
-            feedback === 'useful' ? 'Sí, muy útil' : 
-            feedback === 'neutral' ? 'Más o menos' : 'No fue útil', 
-            'user'
-        );
+    obtenerTextoTipoPregunta(tipo) {
+        const textos = {
+            'booleano': 'Responde Sí o No',
+            'opciones': 'Selecciona una opción',
+            'multiple': 'Selección múltiple'
+        };
+        return textos[tipo] || 'Selecciona una respuesta';
+    }
 
-        this.addMessage('CycloBot', '¡Gracias por tu feedback! Me ayuda a mejorar.', 'bot');
+    crearBotonRespuesta(respuesta, index, onClick) {
+        const boton = document.createElement('button');
+        boton.className = 'cyber-btn primary';
+        
+        const icono = this.obtenerIconoRespuesta(respuesta, index);
+        boton.innerHTML = `${icono} ${respuesta}`;
+        boton.addEventListener('click', onClick);
+        
+        return boton;
+    }
+
+    obtenerIconoRespuesta(respuesta, index) {
+        // Iconos basados en el contenido de la respuesta
+        const texto = respuesta.toLowerCase();
+        
+        if (texto.includes('sí') || texto.includes('si') || texto.includes('yes')) return '✅';
+        if (texto.includes('no') || texto.includes('not')) return '❌';
+        if (texto.includes('tal vez') || texto.includes('maybe') || texto.includes('no sé')) return '🤔';
+        if (texto.includes('siempre') || texto.includes('always')) return '🔄';
+        if (texto.includes('nunca') || texto.includes('never')) return '🚫';
+        
+        // Iconos numéricos para opciones genéricas
+        const iconosNumericos = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣'];
+        return iconosNumericos[index] || '🔹';
+    }
+
+    crearBotonVolver() {
+        const boton = document.createElement('button');
+        boton.className = 'cyber-btn secondary back-button';
+        boton.innerHTML = '↩️ Volver a la pregunta anterior';
+        boton.addEventListener('click', () => this.volverPreguntaAnterior());
+        return boton;
+    }
+
+    async procesarRespuestaUsuario(respuesta, pregunta) {
+        // Guardar respuesta del usuario
+        this.userAnswers.push({
+            pregunta: pregunta.preguntas[0],
+            respuesta: respuesta,
+            preguntaId: pregunta.id,
+            timestamp: new Date().toISOString()
+        });
+
+        // Mostrar respuesta del usuario en el chat
+        this.addMessage('user', `💬 ${respuesta}`);
+
+        // Verificar si es pregunta final
+        if (pregunta.es_pregunta_final) {
+            await this.mostrarDiagnosticoCompleto(pregunta);
+            return;
+        }
+
+        // Obtener siguiente pregunta basada en la respuesta
+        setTimeout(async () => {
+            await this.obtenerYMostrarSiguientePregunta(pregunta.id);
+        }, 800);
+    }
+
+    async mostrarDiagnosticoFinal() {
+        try {
+            this.mostrarCargando('Analizando respuestas...');
+            
+            const diagnostico = await window.SupabaseClient.obtenerDiagnosticoFinal(
+                this.currentCategory,
+                this.userAnswers
+            );
+
+            if (diagnostico) {
+                await this.mostrarDiagnosticoCompleto(diagnostico);
+            } else {
+                this.mostrarDiagnosticoGenerico();
+            }
+            
+            this.ocultarCargando();
+            
+        } catch (error) {
+            console.error('Error obteniendo diagnóstico:', error);
+            this.mostrarDiagnosticoGenerico();
+            this.ocultarCargando();
+        }
+    }
+
+    async mostrarDiagnosticoCompleto(diagnostico) {
+        this.diagnosticsCount++;
+        this.actualizarEstadisticas();
+        
+        this.addMessage('bot', '🎉 **DIAGNÓSTICO COMPLETADO**');
+        
+        // Mostrar causa probable
+        if (diagnostico.causa_probable) {
+            this.addMessage('bot', `🔍 **Causa Probable:** ${diagnostico.causa_probable}`);
+        }
+        
+        // Mostrar soluciones
+        if (diagnostico.soluciones && diagnostico.soluciones.length > 0) {
+            this.addMessage('bot', '🛠️ **Soluciones Recomendadas:**');
+            
+            diagnostico.soluciones.forEach((solucion, index) => {
+                this.addMessage('bot', `${index + 1}. ${solucion}`);
+            });
+        } else {
+            this.mostrarSolucionesGenericas();
+        }
+        
+        this.diagnosisActive = false;
+        this.mostrarOpcionesPostDiagnostico();
+    }
+
+    mostrarDiagnosticoGenerico() {
+        this.addMessage('bot', '🔍 **DIAGNÓSTICO GENERAL**');
+        this.addMessage('bot', 'No se pudo determinar un diagnóstico específico basado en las respuestas.');
+        this.mostrarSolucionesGenericas();
+        this.mostrarOpcionesPostDiagnostico();
+    }
+
+    mostrarSolucionesGenericas() {
+        this.addMessage('bot', '💡 **Soluciones Generales Recomendadas:**');
+        this.addMessage('bot', '1. **Reinicia el dispositivo** - Apaga y enciende nuevamente');
+        this.addMessage('bot', '2. **Verifica conexiones** - Cables, WiFi, alimentación');
+        this.addMessage('bot', '3. **Actualiza software** - Sistema operativo y controladores');
+        this.addMessage('bot', '4. **Ejecuta diagnóstico** - Herramientas del sistema');
+        this.addMessage('bot', '5. **Consulta especialista** - Si el problema persiste');
+    }
+
+    mostrarOpcionesPostDiagnostico() {
+        this.limpiarBotones();
+        
+        const botonesArea = document.getElementById('botonesArea');
+        
+        const opciones = [
+            {
+                texto: '🔄 Nuevo Diagnóstico',
+                accion: () => this.nuevoDiagnostico(),
+                tipo: 'primary'
+            },
+            {
+                texto: '⭐ Fue Útil',
+                accion: () => this.calificarDiagnostico('util'),
+                tipo: 'success'
+            },
+            {
+                texto: '📊 Ver Estadísticas',
+                accion: () => this.mostrarEstadisticasCompletas(),
+                tipo: 'secondary'
+            }
+        ];
+        
+        opciones.forEach(opcion => {
+            const boton = document.createElement('button');
+            boton.className = `cyber-btn ${opcion.tipo}`;
+            boton.innerHTML = opcion.texto;
+            boton.addEventListener('click', opcion.accion);
+            boton.style.margin = '2px 0';
+            botonesArea.appendChild(boton);
+        });
+    }
+
+    volverPreguntaAnterior() {
+        if (this.questionHistory.length > 1) {
+            // Remover pregunta actual del historial
+            this.questionHistory.pop();
+            this.userAnswers.pop();
+            
+            const preguntaAnterior = this.questionHistory[this.questionHistory.length - 1];
+            
+            // Remover mensajes de la interacción actual
+            this.removerUltimosMensajes(2);
+            
+            // Restaurar pregunta anterior
+            this.currentQuestion = preguntaAnterior;
+            this.mostrarOpcionesRespuesta(preguntaAnterior);
+        }
+    }
+
+    removerUltimosMensajes(cantidad) {
+        const chatMessages = document.getElementById('chatMessages');
+        const mensajes = chatMessages.querySelectorAll('.message');
+        
+        for (let i = 0; i < cantidad && mensajes.length > 0; i++) {
+            mensajes[mensajes.length - 1].remove();
+        }
+    }
+
+    async nuevoDiagnostico() {
+        this.resetEstado();
+        this.addMessage('bot', '🔄 **Iniciando nuevo diagnóstico...**');
+        await this.mostrarCategoriasReales();
+    }
+
+    resetEstado() {
+        this.currentCategory = null;
+        this.currentQuestion = null;
+        this.questionHistory = [];
+        this.userAnswers = [];
+        this.diagnosisActive = false;
+    }
+
+    // MÉTODOS DE UTILIDAD
+    generateSessionId() {
+        return 'session_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
+    }
+
+    addMessage(sender, content) {
+        const chatMessages = document.getElementById('chatMessages');
+        
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${sender}-message`;
+        
+        const contentDiv = document.createElement('div');
+        contentDiv.className = 'message-content';
+        contentDiv.innerHTML = content;
+        
+        messageDiv.appendChild(contentDiv);
+        chatMessages.appendChild(messageDiv);
+        
+        // Auto-scroll al final
+        setTimeout(() => {
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }, 100);
+    }
+
+    limpiarChat() {
+        document.getElementById('chatMessages').innerHTML = '';
+    }
+
+    limpiarBotones() {
+        document.getElementById('botonesArea').innerHTML = '';
+    }
+
+    mostrarCargando(mensaje = 'Cargando...') {
+        // Implementar overlay de carga si es necesario
+        console.log('⏳', mensaje);
+    }
+
+    ocultarCargando() {
+        console.log('✅ Carga completada');
+    }
+
+    async actualizarContadorProblemas() {
+        try {
+            const { data, error } = await window.SupabaseClient.supabase
+                .from('problemas')
+                .select('id', { count: 'exact' });
+                
+            if (!error && data) {
+                this.problemsCount = data.length;
+                this.actualizarEstadisticas();
+            }
+        } catch (error) {
+            console.error('Error contando problemas:', error);
+        }
+    }
+
+    actualizarEstadisticas() {
+        const problemsCountElement = document.getElementById('problemsCount');
+        const diagnosticsCountElement = document.getElementById('diagnosticsCount');
+        
+        if (problemsCountElement) {
+            problemsCountElement.textContent = this.problemsCount || '316';
+        }
+        
+        if (diagnosticsCountElement) {
+            diagnosticsCountElement.textContent = this.diagnosticsCount;
+        }
+    }
+
+    mostrarOpcionesRecuperacion() {
+        this.limpiarBotones();
+        
+        const botonesArea = document.getElementById('botonesArea');
+        
+        const opcionesRecuperacion = [
+            {
+                texto: '🔄 Reintentar',
+                accion: () => this.obtenerYMostrarSiguientePregunta(),
+                tipo: 'primary'
+            },
+            {
+                texto: '📂 Cambiar Categoría',
+                accion: () => this.nuevoDiagnostico(),
+                tipo: 'secondary'
+            }
+        ];
+        
+        opcionesRecuperacion.forEach(opcion => {
+            const boton = document.createElement('button');
+            boton.className = `cyber-btn ${opcion.tipo}`;
+            boton.innerHTML = opcion.texto;
+            boton.addEventListener('click', opcion.accion);
+            botonesArea.appendChild(boton);
+        });
+    }
+
+    calificarDiagnostico(calificacion) {
+        this.addMessage('user', `⭐ Calificación: ${calificacion}`);
+        this.addMessage('bot', '¡Gracias por tu feedback! Me ayuda a mejorar.');
         
         setTimeout(() => {
-            this.showRestartOption();
+            this.mostrarOpcionesPostDiagnostico();
         }, 1000);
     }
 
-    showRestartOption() {
-        const responsesContainer = document.getElementById('responses-container');
-        responsesContainer.innerHTML = '';
-
-        const restartButton = document.createElement('button');
-        restartButton.className = 'cyber-response-button primary-button';
-        restartButton.innerHTML = `
-            <i class="fas fa-play"></i>
-            <span>Comenzar nuevo diagnóstico</span>
-        `;
-        restartButton.onclick = () => this.restartDiagnostic();
-        responsesContainer.appendChild(restartButton);
+    mostrarEstadisticasCompletas() {
+        this.addMessage('bot', '📊 **ESTADÍSTICAS DE LA SESIÓN**');
+        this.addMessage('bot', `• Diagnósticos realizados: ${this.diagnosticsCount}`);
+        this.addMessage('bot', `• Problemas en base de datos: ${this.problemsCount}`);
+        this.addMessage('bot', `• Categoría actual: ${this.currentCategory ? this.formatearNombreCategoria(this.currentCategory) : 'Ninguna'}`);
+        this.addMessage('bot', `• Preguntas respondidas: ${this.userAnswers.length}`);
     }
 
-    showNavigationControls() {
-        const navContainer = document.getElementById('navigation-controls');
-        
-        if (this.questionHistory.length > 1) {
-            navContainer.style.display = 'flex';
-            navContainer.innerHTML = '';
-
-            const backButton = document.createElement('button');
-            backButton.className = 'cyber-nav-button';
-            backButton.innerHTML = `
-                <i class="fas fa-arrow-left"></i>
-                <span>Volver a la pregunta anterior</span>
-            `;
-            backButton.onclick = () => this.goBack();
-            navContainer.appendChild(backButton);
-
-            const restartButton = document.createElement('button');
-            restartButton.className = 'cyber-nav-button secondary';
-            restartButton.innerHTML = `
-                <i class="fas fa-rotate-left"></i>
-                <span>Reiniciar diagnóstico</span>
-            `;
-            restartButton.onclick = () => this.restartDiagnostic();
-            navContainer.appendChild(restartButton);
-        } else {
-            navContainer.style.display = 'none';
+    handleQuickAction(action) {
+        switch (action) {
+            case 'start':
+                this.nuevoDiagnostico();
+                break;
+            case 'reset':
+                this.resetBotCompleto();
+                break;
+            case 'help':
+                this.mostrarAyuda();
+                break;
         }
     }
 
-    goBack() {
-        if (this.questionHistory.length > 1) {
-            // Remover pregunta actual y respuesta
-            this.questionHistory.pop();
-            this.userResponses.pop();
-            
-            const previousQuestion = this.questionHistory[this.questionHistory.length - 1];
-            
-            // Remover mensajes de la pregunta actual y respuesta
-            this.removeLastMessages(2);
-            
-            // Mostrar pregunta anterior
-            this.displayQuestion(previousQuestion);
-        }
+    resetBotCompleto() {
+        this.limpiarChat();
+        this.limpiarBotones();
+        this.resetEstado();
+        this.diagnosticsCount = 0;
+        this.actualizarEstadisticas();
+        this.mostrarInterfazInicial();
     }
 
-    removeLastMessages(count) {
-        const messagesContainer = document.getElementById('messages-container');
-        const messages = messagesContainer.querySelectorAll('.message');
-        
-        for (let i = 0; i < count && messages.length > 0; i++) {
-            messages[messages.length - 1].remove();
-        }
+    mostrarAyuda() {
+        this.addMessage('bot', 'ℹ️ **AYUDA - SISTEMA CYCLOPSBOT**');
+        this.addMessage('bot', '1. **Selecciona una categoría** de problema');
+        this.addMessage('bot', '2. **Responde las preguntas** que aparecen');
+        this.addMessage('bot', '3. **Recibe diagnóstico** y soluciones');
+        this.addMessage('bot', '4. **Puedes volver atrás** si te equivocas');
+        this.addMessage('bot', '5. **Califica el diagnóstico** para mejorar');
     }
-
-    restartDiagnostic() {
-        this.currentQuestion = null;
-        this.questionHistory = [];
-        this.userResponses = [];
-        this.diagnosticState = 'category_selection';
-        this.possibleProblems = [];
-
-        const messagesContainer = document.getElementById('messages-container');
-        const responsesContainer = document.getElementById('responses-container');
-        const navContainer = document.getElementById('navigation-controls');
-
-        messagesContainer.innerHTML = '';
-        responsesContainer.innerHTML = '';
-        navContainer.innerHTML = '';
-        navContainer.style.display = 'none';
-
-        this.showWelcomeMessage();
-    }
-
-    addMessage(sender, text, type) {
-        const messagesContainer = document.getElementById('messages-container');
-        const messageElement = document.createElement('div');
-        messageElement.className = `message ${type}-message`;
-        
-        const timestamp = new Date().toLocaleTimeString('es-ES', { 
-            hour: '2-digit', 
-            minute: '2-digit' 
-        });
-
-        messageElement.innerHTML = `
-            <div class="message-header">
-                <span class="message-sender">${sender}</span>
-                <span class="message-time">${timestamp}</span>
-            </div>
-            <div class="message-content">${this.formatMessageText(text)}</div>
-        `;
-
-        messagesContainer.appendChild(messageElement);
-        messagesContainer.scrollTop = messagesContainer.scrollHeight;
-    }
-
-    formatMessageText(text) {
-        // Convertir **texto** a negrita
-        return text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-    }
-}
-
-// Funciones de utilidad globales
-function showLoading(message = 'Cargando...') {
-    const overlay = document.getElementById('loading-overlay');
-    const text = overlay.querySelector('.loading-text');
-    
-    text.textContent = message;
-    overlay.style.display = 'flex';
-    
-    // Asegurar que esté sobre todo
-    overlay.style.zIndex = '1000';
-}
-
-function hideLoading() {
-    const overlay = document.getElementById('loading-overlay');
-    overlay.style.display = 'none';
 }
 
 // Inicializar cuando el DOM esté listo
 document.addEventListener('DOMContentLoaded', function() {
-    window.diagnosticChat = new DiagnosticChat();
+    // Esperar a que Supabase esté listo
+    setTimeout(() => {
+        window.cyclopsBot = new CyclopsBotReal();
+    }, 1000);
 });
 
 // Exportar para uso global
-window.DiagnosticChat = DiagnosticChat;
+window.CyclopsBotReal = CyclopsBotReal;
