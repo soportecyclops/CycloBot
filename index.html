@@ -1066,125 +1066,127 @@
     
     <script>
         // Sistema de visitas y estadísticas en tiempo real
-        class StatisticsManager {
-            constructor() {
-                this.diagnosticsCount = parseInt(localStorage.getItem('cyclopsbot_diagnostics') || '0');
-                this.visitsCount = parseInt(localStorage.getItem('cyclopsbot_visits') || '0');
-                this.problemsCount = 0;
-                this.categories = [];
-                
-                this.init();
+class StatisticsManager {
+    constructor() {
+        this.diagnosticsCount = parseInt(localStorage.getItem('cyclopsbot_diagnostics') || '0');
+        this.visitsCount = parseInt(localStorage.getItem('cyclopsbot_visits') || '0');
+        this.problemsCount = 0;
+        this.categories = [];
+        
+        this.init();
+    }
+
+    init() {
+        // Incrementar contador de visitas
+        this.incrementVisits();
+        
+        // Actualizar UI
+        this.updateUI();
+        
+        // Cargar datos de Supabase
+        this.loadSupabaseData();
+    }
+
+    incrementVisits() {
+        this.visitsCount++;
+        localStorage.setItem('cyclopsbot_visits', this.visitsCount.toString());
+    }
+
+    incrementDiagnostics() {
+        this.diagnosticsCount++;
+        localStorage.setItem('cyclopsbot_diagnostics', this.diagnosticsCount.toString());
+        this.updateUI();
+    }
+
+    async loadSupabaseData() {
+        try {
+            // Cargar contador de problemas desde Supabase
+            const { data: problems, error } = await supabase
+                .from('problemas')
+                .select('id', { count: 'exact' });
+
+            if (!error && problems !== null) {
+                this.problemsCount = problems.length;
             }
 
-            init() {
-                // Incrementar contador de visitas
-                this.incrementVisits();
-                
-                // Actualizar UI
-                this.updateUI();
-                
-                // Cargar datos de Supabase
-                this.loadSupabaseData();
-            }
+            // Cargar categorías unificadas
+            this.categories = [
+                { nombre: '🌐 Internet & Redes', icono: 'fas fa-wifi' },
+                { nombre: '💻 Software & Sistema', icono: 'fas fa-code' },
+                { nombre: '🔧 Hardware & PC', icono: 'fas fa-microchip' },
+                { nombre: '📱 Celulares & Móviles', icono: 'fas fa-mobile-alt' },
+                { nombre: '🛡️ Seguridad Digital', icono: 'fas fa-shield-alt' },
+                { nombre: '💾 Almacenamiento', icono: 'fas fa-hdd' },
+                { nombre: '🖱️ Periféricos', icono: 'fas fa-mouse' }
+            ];
+            
+            this.updateUI();
+            this.updateCategoriesList();
+            
+        } catch (error) {
+            console.error('Error cargando datos de Supabase:', error);
+            // Valores por defecto
+            this.problemsCount = 536; // Tu número actual de problemas
+            this.categories = [
+                { nombre: '🌐 Internet & Redes', icono: 'fas fa-wifi' },
+                { nombre: '💻 Software & Sistema', icono: 'fas fa-code' },
+                { nombre: '🔧 Hardware & PC', icono: 'fas fa-microchip' },
+                { nombre: '📱 Celulares & Móviles', icono: 'fas fa-mobile-alt' },
+                { nombre: '🛡️ Seguridad Digital', icono: 'fas fa-shield-alt' }
+            ];
+            this.updateUI();
+            this.updateCategoriesList();
+        }
+    }
 
-            incrementVisits() {
-                this.visitsCount++;
-                localStorage.setItem('cyclopsbot_visits', this.visitsCount.toString());
-            }
+    updateUI() {
+        // Actualizar contador de problemas
+        const problemsElement = document.getElementById('problemsCount');
+        if (problemsElement) {
+            problemsElement.innerHTML = this.problemsCount.toLocaleString();
+        }
 
-            incrementDiagnostics() {
-                this.diagnosticsCount++;
-                localStorage.setItem('cyclopsbot_diagnostics', this.diagnosticsCount.toString());
-                this.updateUI();
-            }
+        // Actualizar contador de diagnósticos
+        const diagnosticsElement = document.getElementById('diagnosticsCount');
+        if (diagnosticsElement) {
+            diagnosticsElement.textContent = this.diagnosticsCount;
+        }
 
-            async loadSupabaseData() {
-                try {
-                    // Cargar contador de problemas desde Supabase
-                    const { data: problems, error } = await supabase
-                        .from('problemas')
-                        .select('id', { count: 'exact' });
+        // Actualizar contador de visitas
+        const visitsElement = document.getElementById('visitsCount');
+        if (visitsElement) {
+            visitsElement.textContent = this.visitsCount;
+        }
+    }
 
-                    if (!error && problems !== null) {
-                        this.problemsCount = problems.length;
-                    }
+    updateCategoriesList() {
+        const categoriesList = document.getElementById('categoriesList');
+        if (!categoriesList) return;
 
-                    // Cargar categorías desde Supabase
-                    const categorias = await window.SupabaseClient.obtenerCategorias();
-                    this.categories = categorias || [];
-                    
-                    this.updateUI();
-                    this.updateCategoriesList();
-                    
-                } catch (error) {
-                    console.error('Error cargando datos de Supabase:', error);
-                    // Valores por defecto
-                    this.problemsCount = 316;
-                    this.categories = ['internet', 'celulares_moviles', 'software', 'hardware'];
-                    this.updateUI();
-                    this.updateCategoriesList();
-                }
-            }
+        categoriesList.innerHTML = '';
 
-            updateUI() {
-                // Actualizar contador de problemas
-                const problemsElement = document.getElementById('problemsCount');
-                if (problemsElement) {
-                    problemsElement.innerHTML = this.problemsCount.toLocaleString();
-                }
+        this.categories.forEach(categoria => {
+            const categoryElement = document.createElement('div');
+            categoryElement.className = 'capability-item';
+            
+            categoryElement.innerHTML = `
+                <div class="capability-icon">
+                    <i class="${categoria.icono}"></i>
+                </div>
+                <div class="capability-info">
+                    <span class="capability-title">${categoria.nombre}</span>
+                </div>
+            `;
+            
+            categoriesList.appendChild(categoryElement);
+        });
+    }
 
-                // Actualizar contador de diagnósticos
-                const diagnosticsElement = document.getElementById('diagnosticsCount');
-                if (diagnosticsElement) {
-                    diagnosticsElement.textContent = this.diagnosticsCount;
-                }
-
-                // Actualizar contador de visitas
-                const visitsElement = document.getElementById('visitsCount');
-                if (visitsElement) {
-                    visitsElement.textContent = this.visitsCount;
-                }
-            }
-
-            updateCategoriesList() {
-                const categoriesList = document.getElementById('categoriesList');
-                if (!categoriesList) return;
-
-                categoriesList.innerHTML = '';
-
-                if (this.categories.length === 0) {
-                    categoriesList.innerHTML = `
-                        <div class="capability-item">
-                            <div class="capability-icon">
-                                <i class="fas fa-exclamation-triangle"></i>
-                            </div>
-                            <div class="capability-info">
-                                <span class="capability-title">No hay categorías</span>
-                            </div>
-                        </div>
-                    `;
-                    return;
-                }
-
-                this.categories.forEach(categoria => {
-                    const categoryElement = document.createElement('div');
-                    categoryElement.className = 'capability-item';
-                    
-                    const icon = this.getCategoryIcon(categoria);
-                    const name = this.formatCategoryName(categoria);
-                    
-                    categoryElement.innerHTML = `
-                        <div class="capability-icon">
-                            <i class="${icon}"></i>
-                        </div>
-                        <div class="capability-info">
-                            <span class="capability-title">${name}</span>
-                        </div>
-                    `;
-                    
-                    categoriesList.appendChild(categoryElement);
-                });
-            }
+    // Método para que el bot de diagnóstico pueda incrementar el contador
+    recordDiagnosis() {
+        this.incrementDiagnostics();
+    }
+}
 
             getCategoryIcon(categoria) {
                 const icons = {
@@ -1276,3 +1278,4 @@
     </script>
 </body>
 </html>
+
